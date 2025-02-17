@@ -1,0 +1,409 @@
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-center">Gestión de Conceptos</h3><br/>
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: white !important; padding: 0;">
+                <button class="btn btn-primary" id="btnAddConcepto">
+                    <i class="fas fa-fw fa-plus me-2"></i>
+                    <span>Nuevo</span>
+                </button>
+                <button class="btn btn-primary" id="btnPDF">
+                    <i class="fas fa-fw fa-print"></i>
+                    <span>Imprimir</span>
+                </button>
+                <button class="btn btn-primary" id="btnExportar">
+                    <i class="fas fa-fw fa-file-excel"></i>
+                    <span>Exportar</span>
+                </button>
+                <button class="btn btn-primary" id="btnClonar">
+                    <i class="fas fa-fw fa-clone"></i>
+                    <span>Clonar</span>
+                </button>
+                <div class="btn-group">
+                    <input id="txtBuscar" class="form-control me-2" type="search" placeholder="Filtrar por..." aria-label="Search">
+                    <select id="cmbPlantilla" class="form-control form-control-user  "></select>
+                </div>
+            </nav>
+
+            <br/>
+            <table id="conceptoTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Cód</th>
+                        <th>Ord</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Fórmula</th>
+                        <th>Valor</th>                        
+                        <th>Visible</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Se llenará dinámicamente con DataTables -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agregar/Editar Concepto -->
+<div class="modal fade" id="conceptoModal" tabindex="-1" aria-labelledby="conceptoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="conceptoForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="conceptoModalLabel">Agregar Concepto</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="codiConc" name="codiConc">
+                    <input type="hidden" id="codiPlant" name="codiPlant">
+                    <div class="mb-3">
+                        <label for="nombConc" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombConc" name="nombConc" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipoConc" class="form-label">Tipo</label>
+                        <!--<input type="number" class="form-control" id="tipoConc" name="tipoConc" required>-->
+                        <select class="form-control" id="tipoConc" name="tipoConc">
+                            <option value="1">VALOR</option>
+                            <option value="2">FORMULA</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cateConc" class="form-label">Categoría</label>
+                        <!--<input type="number" class="form-control" id="cateConc" name="cateConc" required>-->
+                        <select class="form-control" id="cateConc" name="cateConc">
+                            <option value="1">SISTEMA</option>
+                            <option value="2">INGRESOS</option>
+                            <option value="3">EGRESOS</option>
+                            <option value="4">APORTES</option>
+                            <option value="5">TOTAL</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="formula" class="form-label">Fórmula</label>
+                        <input type="text" class="form-control" id="formula" name="formula">
+                    </div>
+                    <div class="mb-3">
+                        <label for="valor" class="form-label">Valor</label>
+                        <input type="number" step="0.0001" class="form-control" id="valor" name="valor">
+                    </div>
+                    <div class="mb-3">
+                        <label for="ordnConc" class="form-label">Orden</label>
+                        <input type="number" class="form-control" id="ordnConc" name="ordnConc">
+                    </div>
+                    <div class="mb-3">
+                        <label for="visible" class="form-label">Visible</label>
+                        <select class="form-control" id="visible" name="visible">
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Clonar-->
+<div class="modal fade" id="clonarModal" tabindex="-1" aria-labelledby="clonarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">   
+            <div class="modal-header">
+                <h5 class="modal-title" id="conceptoModalLabel">Clonar Plantilla Completa</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label for="nombConc" class="form-label">Nombre:</label>
+                    <input type="text" class="form-control" id="nombPlant" name="nombPlant" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnClonarPlantilla" class="btn btn-primary">Clonar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Cargar opciones de plantilla
+        let cargarPlantillas = function () {
+            $.getJSON("plantillaservlet", function (data) {
+                var select = $('#cmbPlantilla');
+
+                // Limpiar las opciones existentes
+                select.empty();
+
+                // Iterar sobre el array de plantillas y crear las opciones
+                $.each(data, function (index, plantilla) {
+                    select.append('<option value="' + plantilla.codiPlant + '">' + plantilla.nombPlant + '</option>');
+                });
+
+            }).fail(function () {
+                alert("Error al cargar las plantillas.");
+                // Opcional: Manejar errores visualmente
+                // $('#plantilla-container').html('<p>Error al cargar las plantillas.</p>');
+            });
+        };
+        cargarPlantillas();
+
+        // Inicializar DataTable
+
+        const conceptoTable = $('#conceptoTable').DataTable({
+            ajax: {
+                url: 'conceptoservlet',
+                type: 'GET',
+                dataSrc: ''
+            },
+            columns: [
+                {data: 'codiConc'},
+                {data: 'ordnConc'}, // Mostrar la columna 'Orden'
+                {data: 'nombConc'},
+                {data: 'tipoConc', render: function (data, type, row) {
+                        switch (data) {
+                            case 1:
+                                return 'VALOR';
+                            case 2:
+                                return 'FORMULA';
+                        }
+                    }},
+                {data: 'cateConc', render: function (data, type, row) {
+                        switch (data) {
+                            case 1:
+                                return 'SISTEMA';
+                            case 2:
+                                return 'INGRESOS';
+                            case 3:
+                                return 'EGRESOS';
+                            case 4:
+                                return 'APORTES';
+                            case 5:
+                                return 'TOTAL';
+                        }
+                    }},
+                {data: 'formula'},
+                {data: 'valor'},
+                {data: 'visible', render: function (data) {
+                        return data ? 'Sí' : 'No';
+                    }},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return `
+                            <button class="btn btn-primary btn-sm btnEdit" data-id="${row.codiConc}">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            dom: 't',
+            paging: false, // Deshabilita el paginado
+            info: false, // Opcional: Oculta la barra de información de "mostrando X de Y"
+            language: {
+                emptyTable: "No hay datos disponibles en la tabla"
+            }
+        });
+        // Filtrar la tabla por búsqueda
+        $('#txtBuscar').on('input', function () {
+            conceptoTable.search(this.value).draw();
+        });
+
+        // Imprimir tabla como PDF
+        $('#btnPDF').click(function () {
+            const {jsPDF} = window.jspdf;
+            const doc = new jsPDF();
+            var tableData = [];
+            $('#conceptoTable thead th').each(function (i, header) {
+                tableData.push($(header).text());
+            });
+            var rows = [];
+            $('#conceptoTable tbody tr').each(function () {
+                var rowData = [];
+                $(this).find('td').each(function (i, cell) {
+                    rowData.push($(cell).text());
+                });
+                rows.push(rowData);
+            });
+            doc.autoTable({
+                head: [tableData],
+                body: rows,
+                startY: 20
+            });
+            doc.save('conceptos.pdf');
+        });
+
+        // Exportar tabla a Excel
+        $('#btnExportar').click(function () {
+            var tableData = [];
+            var headers = [];
+            $('#conceptoTable thead th').each(function (i, header) {
+                if (i < $('#conceptoTable thead th').length - 1) {
+                    headers.push($(header).text());
+                }
+            });
+
+            // Primer fila con el título (fuera de los datos de la tabla)
+            var titleRow = [$('#cmbPlantilla').val()]; // Título que quieres mostrar
+            tableData.push(titleRow);  // Añadir el título en la primera fila
+
+            // Añadir una fila vacía para separar el título de los datos
+            tableData.push(new Array(headers.length).fill(''));
+
+            // Datos de la tabla
+            tableData.push(headers);
+
+            $('#conceptoTable tbody tr').each(function () {
+                var rowData = [];
+                $(this).find('td').each(function (i, cell) {
+                    if (i < $('#conceptoTable thead th').length - 1) {
+                        rowData.push($(cell).text());
+                    }
+                });
+                tableData.push(rowData);
+            });
+
+            // Crear la hoja de trabajo
+            var ws = XLSX.utils.aoa_to_sheet(tableData);
+
+            // Combinar celdas para el título
+            ws['!merges'] = [{s: {r: 0, c: 0}, e: {r: 0, c: tableData[0].length - 1}}];
+
+            // Establecer el estilo de la celda combinada (centrado, negrita, tamaño 14)
+            ws['A1'].s = {
+                font: {bold: true, sz: 14},
+                alignment: {horizontal: 'center', vertical: 'center'},
+            };
+
+            // Crear libro de trabajo
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Conceptos");
+
+            // Descargar el archivo Excel
+            XLSX.writeFile(wb, "conceptos.xlsx");
+        });
+
+
+        // Agregar concepto nuevo
+
+        $('#btnAddConcepto').click(function () {
+            $('#conceptoForm')[0].reset();
+            $('#codiPlant').val($('#cmbPlantilla').val()); // Asegúrate de que el valor seleccionado se asigna al campo oculto
+            $('#conceptoModalLabel').text('Agregar Concepto');
+            $('#conceptoModal').modal('show');
+        });
+
+
+        $('#btnClonar').click(function () {
+            $('#clonarModal').modal('show');
+        });
+
+        $('#btnClonarPlantilla').click(function () {
+            let codiPlantOrig = $('#cmbPlantilla').val();
+
+            let nombrePlantilla = $('#nombPlant').val();
+            let parametro = {codiPlantOrig: codiPlantOrig, nombrePlantilla: nombrePlantilla};
+            $.get('clonarplantillaservlet', parametro, function (data) {
+                //console.log(data);
+                if (data.resultado === "ok") {
+                    cargarPlantillas();
+                    $('#clonarModal').modal('hide');
+                    $('#cmbPlantilla').val(data.codigo);
+                    $('#cmbPlantilla').trigger('change');
+                } else {
+                    alert('Ocurrió un error al guardar el concepto.');
+                }
+            });
+        });
+
+
+
+        // Editar concepto
+        $('#conceptoTable tbody').on('click', '.btnEdit', function () {
+            const id = $(this).data('id');
+            $.get('conceptoservlet/' + id, function (data) {
+                $('#codiConc').val(data.codiConc);
+                $('#codiPlant').val();
+                $('#nombConc').val(data.nombConc);
+                $('#formula').val(data.formula);
+                $('#valor').val(data.valor);
+                $('#ordnConc').val(data.ordnConc);
+                $('#visible').val(data.visible);
+                $('#conceptoModalLabel').text('Editar Concepto');
+                $('#conceptoModal').modal('show');
+            });
+        });
+
+
+        // Eliminar concepto
+        $('#conceptoTable tbody').on('click', '.btnEdit', function () {
+            const id = $(this).data('id');
+            $.get('conceptoservlet/' + id, function (data) {
+                $('#codiConc').val(data.codiConc);
+
+                // Asignar el valor de la plantilla seleccionada al campo oculto
+                $('#codiPlant').val($('#cmbPlantilla').val()); // Aquí se asigna el valor seleccionado al campo
+
+                $('#nombConc').val(data.nombConc);
+                $('#formula').val(data.formula);
+                $('#valor').val(data.valor);
+                $('#ordnConc').val(data.ordnConc);
+                $('#visible').val(data.visible);
+                $('#conceptoModalLabel').text('Editar Concepto');
+                $('#conceptoModal').modal('show');
+            });
+        });
+
+        // Guardar o actualizar concepto
+        $('#conceptoForm').submit(function (e) {
+            e.preventDefault();
+
+            const id = $('#codiConc').val();
+            const url = id ? 'conceptoservlet/' + id : 'conceptoservlet';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                data: $(this).serialize(),
+                success: function () {
+                    $('#conceptoModal').modal('hide');
+                    conceptoTable.ajax.reload();
+                },
+                error: function () {
+                    alert('Ocurrió un error al guardar el concepto.');
+                }
+            });
+        });
+
+        $('#cmbPlantilla').on('change', function () {
+            var selectedPlantilla = $(this).val(); // Obtener el valor de la plantilla seleccionada
+            $('#codiPlant').val(selectedPlantilla);
+            conceptoTable.ajax.url('conceptoservlet?plantilla=' + selectedPlantilla).load(); // Recargar DataTable con los datos filtrados
+        });
+    });
+</script>

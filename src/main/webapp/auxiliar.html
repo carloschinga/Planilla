@@ -1,0 +1,263 @@
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+
+            <div class="position-relative d-flex align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">Gestión de Auxiliares</h1>
+            </div>   
+            <nav class="navbar navbar-light bg-white p-2">
+                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
+                    <!-- Selector de Periodo -->
+                    <div class="d-flex align-items-center me-3">
+
+                    </div>
+
+                    <!-- Grupo de Botones -->
+                    <div class="btn-group">
+                        
+                    <select id="cmbPeriodo" class="form-control form-control-user" style="width: auto;"></select>
+                        <button class="btn btn-primary" id="btnAddAux">
+                            <i class="fas fa-fw fa-plus me-2"></i>
+                            <span>Nuevo</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnPDF">
+                            <i class="fas fa-fw fa-print"></i>
+                            <span>Imprimir</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnExportar">
+                            <i class="fas fa-fw fa-file-excel"></i>
+                            <span>Exportar</span>
+                        </button>
+
+                    </div>
+
+
+                </div>
+            </nav>
+            <hr/>
+
+           
+            <table id="auxTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Código Período</th>
+                        <th>Activo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Se llenará dinámicamente con DataTables -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agregar/Editar Auxiliar -->
+<div class="modal fade" id="auxModal" tabindex="-1" aria-labelledby="auxModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="auxForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="auxModalLabel">Agregar Auxiliar</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="codiAux" name="codiAux">
+                    <div class="mb-3">
+                        <label for="nombAux" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombAux" name="nombAux" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="codiPeri" class="form-label">Código Período</label>
+                        <input type="number" class="form-control" id="codiPeri" name="codiPeri" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="actvAux" class="form-label">Activo</label>
+                        <select class="form-control" id="actvAux" name="actvAux" required>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $.getJSON("periodoservlet", function (data) {
+            var select = $('#cmbPeriodo');
+
+            // Limpiar las opciones existentes
+            select.empty();
+
+            // Iterar sobre el array de plantillas y crear las opciones
+            $.each(data, function (index, periodo) {
+                select.append('<option value="' + periodo.codiPeri + '">' + periodo.nombPeri + '</option>');
+            });
+        }).fail(function () {
+            alert("error");
+            //$('#plantilla-container').html('<p>Error al cargar las plantillas.</p>');
+        });
+        // Inicializar DataTable
+        const auxTable = $('#auxTable').DataTable({
+            ajax: {
+                url: 'auxiliarservlet', // URL de tu servlet
+                type: 'GET',
+                dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
+            },
+            columns: [
+                {data: 'codiAux'},
+                {data: 'nombAux'},
+                {data: 'codiPeri'},
+
+                {data: 'actvAux', render: function (data) {
+                        return data ? 'Sí' : 'No';
+                    }},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return `
+                            <button class="btn btn-primary btnEdit" data-id="${row.codiAux}"><i class="fas fa-edit" ></i></button>
+                           `;
+                    }
+                }
+            ],
+            language: {
+                "decimal": "",
+                "emptyTable": "No hay datos disponibles en la tabla",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                "infoPostFix": "",
+                "thousands": ",",
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+                "aria": {
+                    "sortAscending": ": activar para ordenar la columna ascendente",
+                    "sortDescending": ": activar para ordenar la columna descendente"
+                }
+            }
+        });
+
+        // Agregar o Editar Auxiliar
+        $('#auxForm').submit(function (e) {
+            e.preventDefault();
+            const formData = $(this).serialize();
+            const id = $('#codiAux').val();
+            const url = id ? `auxiliarservlet/${id}` : 'auxiliarservlet';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                success: function () {
+                    $('#auxModal').modal('hide');
+                    auxTable.ajax.reload();
+                }
+            });
+        });
+
+        // Abrir modal para editar
+        $('#auxTable tbody').on('click', '.btnEdit', function () {
+            const id = $(this).data('id');
+            $.get(`auxiliarservlet/${id}`, function (data) {
+                $('#codiAux').val(data.codiAux);
+                $('#nombAux').val(data.nombAux);
+                $('#codiPeri').val(data.codiPeri);
+                $('#actvAux').val(data.actvAux);
+                $('#auxModalLabel').text('Editar Auxiliar');
+                $('#auxModal').modal('show');
+            });
+        });
+
+        // Eliminar Auxiliar
+        $('#auxTable tbody').on('click', '.btnDelete', function () {
+            const id = $(this).data('id');
+            if (confirm('¿Estás seguro de que deseas eliminar este registro?')) {
+                $.ajax({
+                    url: `auxiliarservlet/${id}`,
+                    type: 'DELETE',
+                    success: function () {
+                        auxTable.ajax.reload();
+                    }
+                });
+            }
+        });
+
+        // Limpiar modal al abrir para agregar
+        $('#btnAddAux').click(function () {
+            $('#auxForm')[0].reset();
+            $('#codiAux').val('');
+            $('#auxModalLabel').text('Agregar Auxiliar');
+            $('#auxModal').modal('show');
+        });
+
+        // Exportar a Excel
+        $('#btnExportar').click(function () {
+            var tableData = [];
+
+            // Agregar los encabezados de la tabla como la primera fila
+            var headers = [];
+            $('#auxTable thead th').each(function (i, header) {
+                if (i < $('#auxTable thead th').length - 1) {
+                    headers.push($(header).text());
+                }
+            });
+            tableData.push(headers);
+
+            // Agregar las filas de datos de la tabla
+            $('#auxTable tbody tr').each(function () {
+                var rowData = [];
+                $(this).find('td').each(function (i, cell) {
+                    if (i < $(this).parent().find('td').length - 1) {
+                        rowData.push($(cell).text());
+                    }
+                });
+                tableData.push(rowData);
+            });
+
+            // Crear una hoja de trabajo de Excel a partir del array de datos
+            var ws = XLSX.utils.aoa_to_sheet(tableData);
+
+            // Crear un libro de trabajo (workbook)
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Auxiliares');
+
+            // Guardar el archivo Excel
+            XLSX.writeFile(wb, 'auxiliares.xlsx');
+        });
+
+        // Filtro de búsqueda
+        $('#txtBuscar').on('input', function () {
+            auxTable.search(this.value).draw();
+        });
+
+        $('#cmbPeriodo').on('change', function () {
+            var selectedPeriodo = $(this).val(); // Obtener el valor de la plantilla seleccionada
+            $('#codiPeri').val(selectedPeriodo);
+            auxTable.ajax.url('auxiliarservlet?periodo=' + selectedPeriodo).load(); // Recargar DataTable con los datos filtrados
+        });
+    });
+</script>
