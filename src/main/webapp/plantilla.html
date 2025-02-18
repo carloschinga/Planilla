@@ -1,3 +1,4 @@
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
@@ -12,24 +13,20 @@
                     </div>
 
                     <!-- Grupo de Botones -->
-                    <div class="btn-group">
-
-                       <button class="btn btn-primary" id="btnAddPlantilla">
-                    <i class="fas fa-fw fa-plus me-2"></i>
-                    <span>Nuevo</span>
-                </button>
-                <button class="btn btn-primary" id="btnPDF">
-                    <i class="fas fa-fw fa-print"></i>
-                    <span>Imprimir</span>
-                </button>
-                <button class="btn btn-primary" id="btnExportar">
-                    <i class="fas fa-fw fa-file-excel"></i>
-                    <span>Exportar</span>
-                </button>
-
+                    <div class="d-flex gap-3"> 
+                        <button class="btn btn-primary" id="btnAddPlantilla">
+                            <i class="fas fa-fw fa-plus me-2"></i>
+                            <span>Nuevo</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnPDF">
+                            <i class="fas fa-fw fa-print"></i>
+                            <span>Imprimir</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnExportar">
+                            <i class="fas fa-fw fa-file-excel"></i>
+                            <span>Exportar</span>
+                        </button>
                     </div>
-
-
                 </div>
             </nav>
             <hr/>
@@ -49,15 +46,14 @@
     </div>
 </div>
 
-<div class="modal fade" id="plantillaModal" tabindex="-1" role="dialog" aria-labelledby="plantillaModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<!-- Modal -->
+<div class="modal fade" id="plantillaModal" tabindex="-1" aria-labelledby="plantillaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <form id="plantillaForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="plantillaModalLabel">Agregar Plantilla</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
 
                 <div class="modal-body">
@@ -68,14 +64,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary btn-close" type="button" data-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 <script>
     $(document).ready(function () {
         // Inicializar DataTable
@@ -259,7 +254,6 @@
                 });
                 tableData.push(rowData);
             });
-
             // Crear una hoja de trabajo de Excel a partir del array de datos
             var ws = XLSX.utils.aoa_to_sheet(tableData);
 
@@ -270,6 +264,10 @@
             // Guardar el archivo Excel
             XLSX.writeFile(wb, 'plantillas.xlsx');
         });
-
+        $(document).ready(function () {
+            $('#plantillaModal .btn-close, #plantillaModal .btn-secondary').click(function () {
+                $('#plantillaModal').modal('hide');
+            });
+        });
     });
 </script>

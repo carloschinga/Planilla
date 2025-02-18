@@ -1,3 +1,4 @@
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
@@ -13,7 +14,8 @@
                     </div>
 
                     <!-- Grupo de Botones -->
-                    <div class="btn-group">
+                    <!-- Grupo de Botones -->
+                    <div class="d-flex gap-3 mt-4"> <!-- Se agregó gap-3 y mt-4 para dar espacio entre los botones y margen superior -->
                         <button class="btn btn-primary" id="btnAddAux">
                             <i class="fas fa-fw fa-plus me-2"></i>
                             <span>Nuevo</span>
@@ -27,6 +29,7 @@
                             <span>Exportar</span>
                         </button>
                     </div>
+
                 </div>
             </nav>
 
@@ -50,14 +53,12 @@
 
 <!-- Modal para Agregar/Editar Auxiliar -->
 <div class="modal fade" id="auxModal" tabindex="-1" aria-labelledby="auxModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form id="auxForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="auxModalLabel">Agregar Auxiliar</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="codiAux" name="codiAux">
@@ -78,7 +79,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-fw fa-undo"></i>Cancelar
                     </button>
                     <button type="submit" class="btn btn-primary">
@@ -253,6 +254,9 @@
             var selectedPeriodo = $(this).val(); // Obtener el valor de la plantilla seleccionada
             $('#codiPeri').val(selectedPeriodo);
             auxTable.ajax.url('auxiliarservlet?periodo=' + selectedPeriodo).load(); // Recargar DataTable con los datos filtrados
+        });
+        $('#auxModal .btn-close, #auxModal .btn-secondary').click(function () {
+            $('#auxModal').modal('hide');
         });
     });
 </script>

@@ -4,30 +4,23 @@
             <div class="position-relative d-flex align-items-center">
                 <h1 class="h3 mb-0 text-gray-800">Gestión de Fondo de Pensiones</h1>
             </div>   
-            <nav class="navbar navbar-light bg-white p-2">
+            <nav class="navbar navbar-light bg-white p-2">  
                 <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
-                    <!-- Selector de Periodo -->
-                    <div class="d-flex align-items-center me-3">
-
-                    </div>
-
                     <!-- Grupo de Botones -->
                     <div class="btn-group">
-
-                        <button class="btn btn-primary"  id="btnAddAfp" >
+                        <button class="btn btn-primary me-3" id="btnAddAfp">
                             <i class="fas fa-fw fa-plus me-2"></i>
-                            <span>Nuevo</span> </button>
-                        <button class="btn btn-primary" id="btnPDF">
+                            <span>Nuevo</span>
+                        </button>
+                        <button class="btn btn-primary me-3" id="btnPDF">
                             <i class="fas fa-fw fa-print"></i>
-                            <span>Imprimir</span> </button>
+                            <span>Imprimir</span>
+                        </button>
                         <button class="btn btn-primary" id="btnExportar">
                             <i class="fas fa-fw fa-file-excel"></i>
                             <span>Exportar</span>
                         </button>
-
                     </div>
-
-
                 </div>
             </nav>
             <hr/>
@@ -50,7 +43,6 @@
     </div>
 </div>
 
-
 <!-- Modal para Agregar/Editar AFP -->
 <div class="modal fade" id="afpModal" tabindex="-1" aria-labelledby="afpModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -58,11 +50,8 @@
             <form id="afpForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="afpModalLabel">Agregar AFP</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
 
                 <div class="modal-body">
                     <input type="hidden" id="codiAFP" name="codiAFP">
@@ -84,9 +73,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
-
                 </div>
             </form>
         </div>
@@ -97,12 +85,11 @@
     $(document).ready(function () {
         // Inicializar DataTable
         const afpTable = $('#afpTable').DataTable({
-
             ajax: {
                 url: 'afpservlet', // URL de tu servlet
                 type: 'GET',
                 dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
-            }, // Cambiar a la URL de tu backend para obtener la lista de AFP
+            },
             columns: [
                 {data: 'codiAFP'},
                 {data: 'nombAFP'},
@@ -112,9 +99,7 @@
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return `
-                 <button class="btn btn-primary btnEdit" data-id="${row.codiAFP}"><i class="fas fa-edit" ></i></button>
-                  `;
+                        return `<button class="btn btn-primary btnEdit" data-id="${row.codiAFP}"><i class="fas fa-edit"></i> Editar</button>`;
                     }
                 }
             ],
@@ -124,27 +109,69 @@
                 "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
                 "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
                 "infoFiltered": "(filtrado de _MAX_ entradas totales)",
-                "infoPostFix": "",
-                "thousands": ",",
-                "lengthMenu": "Mostrar _MENU_ registros",
-                "loadingRecords": "Cargando...",
-                "processing": "Procesando...",
-                "search": "Buscar:",
-                "zeroRecords": "No se encontraron registros coincidentes",
-                "paginate": {
-                    "first": "Primero",
-                    "last": "Último",
-                    "next": "Siguiente",
-                    "previous": "Anterior"
-                },
-                "aria": {
-                    "sortAscending": ": activar para ordenar la columna ascendente",
-                    "sortDescending": ": activar para ordenar la columna descendente"
-                }
+                "search": "Buscar:"
             }
         });
 
-        // Agregar o Editar AFP
+        // Abrir modal para agregar un nuevo AFP
+        $('#btnAddAfp').click(function () {
+            $('#afpForm')[0].reset();  // Limpiar el formulario
+            $('#codiAFP').val('');     // Asegúrate de que el ID esté vacío para nuevo
+            $('#afpModalLabel').text('Agregar AFP');
+            $('#afpModal').modal('show');
+        });
+
+        // Abrir modal para editar un AFP
+        $('#afpTable tbody').on('click', '.btnEdit', function () {
+            const id = $(this).data('id');
+            $.get(`afpservlet/${id}`, function (data) {
+                $('#codiAFP').val(data.codiAFP);
+                $('#nombAFP').val(data.nombAFP);
+                $('#montAFP').val(data.montAFP);
+                $('#seguAFP').val(data.seguAFP);
+                $('#comiAFP').val(data.comiAFP);
+                $('#afpModalLabel').text('Editar AFP');
+                $('#afpModal').modal('show');
+            });
+        });
+
+        // Manejar el submit del formulario para agregar o editar
+        $('#afpForm').submit(function (e) {
+            e.preventDefault();  // Prevenir el comportamiento por defecto del formulario
+            const id = $('#codiAFP').val();
+            const data = {
+                codiAFP: id,
+                nombAFP: $('#nombAFP').val(),
+                montAFP: $('#montAFP').val(),
+                seguAFP: $('#seguAFP').val(),
+                comiAFP: $('#comiAFP').val()
+            };
+
+            let url = 'afpservlet';
+            let method = 'POST';  // Si existe ID, cambia a PUT
+
+            if (id) {
+                // Si existe un ID, estamos editando
+                url = `afpservlet/${id}`;
+                method = 'PUT'; // Cambiar el método a PUT para edición
+            }
+
+            // Enviar los datos al servidor
+            $.ajax({
+                url: url,
+                type: method,
+                data: data,
+                success: function (response) {
+                    $('#afpModal').modal('hide');
+                    afpTable.ajax.reload();  // Recargar la tabla para mostrar los cambios
+                },
+                error: function (error) {
+                    alert("Hubo un error al guardar los datos.");
+                }
+            });
+        });
+
+        // Funcionalidad de Imprimir
         $('#btnPDF').click(function () {
             const {jsPDF} = window.jspdf;
             const doc = new jsPDF();
@@ -178,21 +205,17 @@
 
             // Obtener encabezados de la tabla
             const headers = [];
-
             $('#afpTable thead th').each(function (i, header) {
-                // Ignorar el último encabezado
                 if (i < $('#afpTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
             });
-
 
             // Obtener filas de la tabla
             const rows = [];
             $('#afpTable tbody tr').each(function () {
                 const row = [];
                 $(this).find('td').each(function (index) {
-                    // Omite la última columna
                     if (index < $(this).parent().find('td').length - 1) {
                         row.push($(this).text());
                     }
@@ -200,75 +223,34 @@
                 rows.push(row);
             });
 
-
-
-
             // Generar la tabla en el PDF
             doc.autoTable({
                 head: [headers],
                 body: rows,
-                startY: 30, // Comienza después del título
+                startY: 30,
             });
 
             // Descargar el PDF
             doc.save('AFP.pdf');
         });
 
-        // Abrir modal para editar
-        $('#afpTable tbody').on('click', '.btnEdit', function () {
-            const id = $(this).data('id');
-            $.get(`afpservlet/${id}`, function (data) {
-                $('#codiAFP').val(data.codiAFP);
-                $('#nombAFP').val(data.nombAFP);
-                $('#montAFP').val(data.montAFP);
-                $('#seguAFP').val(data.seguAFP);
-                $('#comiAFP').val(data.comiAFP);
-                $('#afpModalLabel').text('Editar AFP');
-                $('#afpModal').modal('show');
-            });
-        });
-
-        // Eliminar AFP
-        $('#afpTable tbody').on('click', '.btnDelete', function () {
-            const id = $(this).data('id');
-            if (confirm('¿Estás seguro de que deseas eliminar este registro?')) {
-                $.ajax({
-                    url: `afpservlet/${id}`,
-                    type: 'DELETE',
-                    success: function () {
-                        afpTable.ajax.reload();
-                    }
-                });
-            }
-        });
-
-        // Limpiar modal al abrir para agregar
-        $('#btnAddAfp').click(function () {
-            $('#afpForm')[0].reset();
-            $('#codiAFP').val('');
-            $('#afpModalLabel').text('Agregar AFP');
-            $('#afpModal').modal('show');
-        });
-
+        // Funcionalidad de Exportar
         $('#btnExportar').click(function () {
-            // Crear un array para almacenar los datos de la tabla
             var tableData = [];
 
-            // Agregar los encabezados de la tabla como la primera fila
+            // Agregar los encabezados de la tabla
             var headers = [];
             $('#afpTable thead th').each(function (i, header) {
-                // Ignorar el último encabezado
                 if (i < $('#afpTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
             });
             tableData.push(headers);
 
-            // Agregar las filas de datos de la tabla
+            // Agregar las filas de datos
             $('#afpTable tbody tr').each(function () {
                 var rowData = [];
                 $(this).find('td').each(function (i, cell) {
-                    // Ignorar la última columna
                     if (i < $(this).parent().find('td').length - 1) {
                         rowData.push($(cell).text());
                     }
@@ -276,22 +258,15 @@
                 tableData.push(rowData);
             });
 
-            // Crear una hoja de trabajo de Excel a partir del array de datos
+            // Crear una hoja de trabajo de Excel
             var ws = XLSX.utils.aoa_to_sheet(tableData);
-
-            // Crear un libro de trabajo (workbook)
             var wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'AFP');
-
-            // Guardar el archivo Excel
             XLSX.writeFile(wb, 'afp.xlsx');
         });
-
-
-        $('#txtBuscar').on('input', function () {
-            afpTable.search(this.value).draw();
+        $('#afpModal .btn-close, #afpModal .btn-secondary').click(function () {
+            $('#afpModal').modal('hide');
         });
     });
+
 </script>
-
-

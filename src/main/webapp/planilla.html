@@ -12,31 +12,28 @@
                     </div>
 
                     <!-- Grupo de Botones -->
-                    <div class="btn-group">
-                       
-                        <select id="cmbPeriodo" class="form-control form-control-user form-select-sm" style="width: auto;"></select>
-                        <button class="btn btn-primary " id="btnGenerar">
+                    <div class="d-flex gap-3">
+                        <select id="cmbPeriodo" class="form-select form-select-sm" style="width: auto;"></select>
+                        <button class="btn btn-primary" id="btnGenerar">
                             <i class="fas fa-table"></i> Generar
                         </button>
-                        <button class="btn btn-primary " id="btnCalcular">
+                        <button class="btn btn-primary" id="btnCalcular">
                             <i class="fas fa-cogs"></i> Calcular
                         </button>
-                        <button class="btn btn-primary " id="btnPDF">
+                        <button class="btn btn-primary" id="btnPDF">
                             <i class="fas fa-print"></i> Imprimir
                         </button>
-                        <button class="btn btn-primary " id="btnExportar">
+                        <button class="btn btn-primary" id="btnExportar">
                             <i class="fas fa-file-excel"></i> Exportar
                         </button>
                     </div>
-
 
                 </div>
             </nav>
             <hr/>
             <div class="d-flex align-items-center me-3">
-                <label for="cmbPersona" class="me-2 mb-0 fw-bold">Persona:</label>       &nbsp;                
-                <select id="cmbPersona" class="form-control form-control-user form-select-sm" style="width: auto;"></select>
-
+                <label for="cmbPersona" class="me-2 mb-0 fw-bold">Persona:</label>       
+                <select id="cmbPersona" class="form-select form-select-sm" style="width: auto;"></select>
             </div>
 
             <br/>
@@ -60,7 +57,7 @@
 </div>
 
 <!-- Modal para Agregar/Editar Concepto -->
-<div class="modal fade" id="conceptoModal" tabindex="-1" aria-labelledby="conceptoModalLabel" aria-hidden="true">
+<div class="modal fade" id="conceptoModal" tabindex="-1" aria-labelledby="conceptoModalLabel" inert>
     <div class="modal-dialog">
         <div class="modal-content">
             <form id="conceptoForm">
@@ -93,7 +90,7 @@
 
                     <div class="mb-3">
                         <label for="visible" class="form-label">Visible</label>
-                        <select class="form-control" id="visible" name="visible">
+                        <select class="form-select" id="visible" name="visible">
                             <option value="true">Sí</option>
                             <option value="false">No</option>
                         </select>
@@ -112,28 +109,21 @@
     $(document).ready(function () {
         $.getJSON("periodoservlet", function (data) {
             var select = $('#cmbPeriodo');
-
-            // Limpiar las opciones existentes
             select.empty();
 
-            // Iterar sobre el array de plantillas y crear las opciones
             $.each(data, function (index, periodo) {
                 select.append('<option value="' + periodo.codiPeri + '">' + periodo.nombPeri + '</option>');
             });
             actualizarPersonas($('#cmbPeriodo').val());
         }).fail(function () {
             alert("error");
-            //$('#plantilla-container').html('<p>Error al cargar las plantillas.</p>');
         });
+
         function actualizarPersonas(periodo) {
             let parametro = {periodo: periodo};
             $.getJSON("planillapersonaservlet", parametro, function (data) {
                 var select = $('#cmbPersona');
-
-                // Limpiar las opciones existentes
                 select.empty();
-
-                // Iterar sobre el array de auxiliares y crear las opciones
                 $.each(data, function (index, persona) {
                     select.append('<option value="' + persona.codiPers + '">' + persona.nombPers + '</option>');
                 });
@@ -141,52 +131,45 @@
                 alert("Error al cargar auxiliares");
             });
         }
-        // Inicializar DataTable
+
         const planillaconceptoTable = $('#planillaconceptoTable').DataTable({
             ajax: {
-                url: 'planillaconceptoservlet', // URL de tu servlet
+                url: 'planillaconceptoservlet',
                 type: 'GET',
-                dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
+                dataSrc: ''
             },
-
             columns: [
                 {data: 'codiConc'},
                 {data: 'nombConc'},
                 {data: 'formula'},
                 {data: 'valor',
-                    render: function (data, type, row) {
-                        return parseFloat(data).toFixed(2); // Formatear con 2 decimales
+                    render: function (data) {
+                        return parseFloat(data).toFixed(2);
                     }
                 },
-
                 {data: 'visible', render: function (data) {
                         return data ? 'Sí' : 'No';
-                    }}
-
+                    }
+                }
             ],
             dom: 't',
-            paging: false, // Deshabilita el paginado
-            info: false, // Opcional: Oculta la barra de información de "mostrando X de Y"
+            paging: false,
+            info: false,
             language: {
                 emptyTable: "No hay datos disponibles en la tabla"
             }
         });
-        //buscar
+
         $('#btnGenerar').click(function () {
-            var selectedPeriodo = $('#cmbPeriodo').val(); // Obtener el valor del auxiliar seleccionado
+            var selectedPeriodo = $('#cmbPeriodo').val();
             let parametro = {periodo: selectedPeriodo, accion: 1};
 
             $.getJSON("planillaservlet", parametro, function (data) {
                 if (data.resultado === "ok") {
-
                     var selectedPeriodo = $('#cmbPeriodo').val();
-
                     actualizarPersonas(selectedPeriodo);
-
                     var selectedPersona = $('#cmbPersona').val();
-                    // Obtener el valor de la plantilla seleccionada
-                    planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load(); // Recargar DataTable con los datos correspondientes
-
+                    planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load();
                 } else {
                     alert("Problemas al generar planilla");
                 }
@@ -194,22 +177,17 @@
                 alert("Error al generar la planilla");
             });
         });
+
         $('#btnCalcular').click(function () {
-            var selectedPeriodo = $('#cmbPeriodo').val(); // Obtener el valor del auxiliar seleccionado
+            var selectedPeriodo = $('#cmbPeriodo').val();
             let parametro = {periodo: selectedPeriodo, accion: 2};
             $.getJSON("planillaservlet", parametro, function (data) {
-                console.log(data);
                 if (data.resultado === "ok") {
                     alert("Se calculó correctamente");
-
                     var selectedPeriodo = $('#cmbPeriodo').val();
-
                     actualizarPersonas(selectedPeriodo);
-
                     var selectedPersona = $('#cmbPersona').val();
-                    // Obtener el valor de la plantilla seleccionada
-                    planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load(); // Recargar DataTable con los datos correspondientes
-
+                    planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load();
                 } else {
                     alert("Problemas al calcular planilla");
                 }
@@ -221,19 +199,17 @@
         $('#txtBuscar').on('input', function () {
             planillaconceptoTable.search(this.value).draw();
         });
+
         $('#btnPDF').click(function () {
             const {jsPDF} = window.jspdf;
             const doc = new jsPDF();
 
-            // Obtenemos los datos de la tabla
             var tableData = [];
             $('#planillaconceptoTable thead th').each(function (i, header) {
-                // Agregar los encabezados
                 tableData.push($(header).text());
             });
 
             var rows = [];
-            // Agregar las filas de la tabla
             $('#planillaconceptoTable tbody tr').each(function () {
                 var rowData = [];
                 $(this).find('td').each(function (i, cell) {
@@ -242,37 +218,28 @@
                 rows.push(rowData);
             });
 
-            // Configurar la tabla en el PDF
             doc.autoTable({
-                head: [tableData], // Encabezado
-                body: rows, // Cuerpo de la tabla
-                startY: 20        // Empieza a dibujar desde la parte superior
+                head: [tableData],
+                body: rows,
+                startY: 20
             });
 
-            // Descargar el PDF
             doc.save('conceptos.pdf');
         });
 
-
         $('#btnExportar').click(function () {
-            // Crear un array para almacenar los datos de la tabla
             var tableData = [];
-
-            // Agregar los encabezados de la tabla como la primera fila
             var headers = [];
             $('#planillaconceptoTable thead th').each(function (i, header) {
-                // Ignorar el último encabezado
                 if (i < $('#planillaconceptoTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
             });
             tableData.push(headers);
 
-            // Agregar las filas de datos de la tabla
             $('#planillaconceptoTable tbody tr').each(function () {
                 var rowData = [];
                 $(this).find('td').each(function (i, cell) {
-                    // Ignorar la última columna
                     if (i < $(this).parent().find('td').length - 1) {
                         rowData.push($(cell).text());
                     }
@@ -280,38 +247,26 @@
                 tableData.push(rowData);
             });
 
-            // Crear una hoja de trabajo de Excel a partir del array de datos
             var ws = XLSX.utils.aoa_to_sheet(tableData);
-
-            // Crear un libro de trabajo (workbook)
             var wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
-
-            // Guardar el archivo Excel
             XLSX.writeFile(wb, 'planilla.xlsx');
         });
-        // Agregar o Editar Concepto
-
-        // Abrir modal para editar
-
-        // Eliminar Concepto
-
-        // Limpiar modal al abrir para agregar
-
 
         $('#cmbPeriodo').on('change', function () {
-            var selectedPeriodo = $(this).val(); // Obtener el valor del periodo seleccionado
+            var selectedPeriodo = $(this).val();
             actualizarPersonas(selectedPeriodo);
-
-
         });
 
-        // Evento para actualizar la tabla cuando cambie el auxiliar
         $('#cmbPersona').on('change', function () {
             var selectedPersona = $(this).val();
-            var selectedPeriodo = $('#cmbPeriodo').val(); // Obtener el valor de la plantilla seleccionada
-            planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load(); // Recargar DataTable con los datos correspondientes
-
+            var selectedPeriodo = $('#cmbPeriodo').val();
+            planillaconceptoTable.ajax.url('planillaconceptoservlet?periodo=' + selectedPeriodo + "&persona=" + selectedPersona).load();
         });
+
+        $('#conceptoModal').on('shown.bs.modal', function () {
+            $(this).find('button, input, select').first().focus();
+        });
+
     });
 </script>

@@ -2,10 +2,10 @@
     <div class="card">
         <div class="card-body">
             <div class="position-relative d-flex align-items-center">
-                <h3 class="text-center w-100 m-0 position-absolute">Registro de Auxiliares </h3>
+                <h3 class="text-center w-100 m-0 position-absolute">Registro de Auxiliares</h3>
                 <div class="ms-auto d-flex align-items-center" style="z-index: 1;">
                     <label for="cmbPeriodo" class="me-2 mb-0">Periodo</label>
-                    <select id="cmbPeriodo" class="form-control form-control-user" style="width: auto;"></select>
+                    <select id="cmbPeriodo" class="form-select form-select-sm" style="width: auto;"></select>
                 </div>
             </div>
             <br/>
@@ -23,8 +23,8 @@
                     <span>Exportar</span>
                 </button>
                 <div class="btn-group">
-                    <input id="txtBuscar" class="form-control me-2" type="search" placeholder="Filtrar por..." aria-label="Search">
-                    <select id="cmbAuxiliar" class="form-control form-control-user" style="width: auto;"></select>
+                    <input id="txtBuscar" class="form-control form-control-sm me-2" type="search" placeholder="Filtrar por..." aria-label="Search">
+                    <select id="cmbAuxiliar" class="form-select form-select-sm" style="width: auto;"></select>
                 </div>
             </nav>
             </br>
@@ -34,7 +34,6 @@
                         <th>Código Detalle</th>
                         <th>Código Auxiliar</th>
                         <th>Código Persona</th>
-                        
                         <th>Descripción</th>
                         <th>Monto</th>
                         <th>Acciones</th>
@@ -55,39 +54,41 @@
             <form id="auxForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="auxModalLabel">Agregar Detalle</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
                     <input type="hidden" id="codiDetaAux" name="codiDetaAux">
-                    <div class="mb-3">
-                        <label for="codiAux" class="form-label">Código Auxiliar</label>
+
+                    <div class="mb-4">
+                        <label for="codiAux" class="form-label d-block mb-4">Código Auxiliar</label>
                         <input type="number" class="form-control" id="codiAux" name="codiAux" required>
                     </div>
-                    <div class="mb-3">
+
+                    <div class="mb-4">
                         <label for="codiPers" class="form-label">Código Persona</label>
                         <input type="number" class="form-control" id="codiPers" name="codiPers" required>
                     </div>
-                    <div class="mb-3">
+
+                    <div class="mb-4">
                         <label for="descDeta" class="form-label">Descripción</label>
                         <input type="text" class="form-control" id="descDeta" name="descDeta" required>
                     </div>
-                    <div class="mb-3">
+
+                    <div class="mb-4">
                         <label for="montDeta" class="form-label">Monto</label>
                         <input type="number" class="form-control" id="montDeta" name="montDeta" required>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
 <script>
     $(document).ready(function () {
         $.getJSON("periodoservlet", function (data) {
@@ -256,7 +257,7 @@
             var selectedPeriodo = $(this).val(); // Obtener el valor del periodo seleccionado
             actualizarAuxiliares(selectedPeriodo);
 
-            
+
         });
 
         // Evento para actualizar la tabla cuando cambie el auxiliar

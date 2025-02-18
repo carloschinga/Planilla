@@ -3,21 +3,25 @@
         <div class="card-body">
             <h3 class="text-center">Gestión de Personas</h3><br/>
             <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: white !important; padding: 0;">
-                <button class="btn btn-primary"  id="btnAddPersona" >
-                    <i class="fas fa-fw fa-plus me-2"></i>
-                    <span>Nuevo</span> </button>
-                <button class="btn btn-primary" id="btnPDF">
-                    <i class="fas fa-fw fa-print"></i>
-                    <span>Imprimir</span> </button>
-                <button class="btn btn-primary" id="btnExportar">
-                    <i class="fas fa-fw fa-file-excel"></i>
-                    <span>Exportar</span>
-                </button>
+                <div class="d-flex gap-3"> 
+                    <button class="btn btn-primary" id="btnAddPersona">
+                        <i class="fas fa-fw fa-plus me-2"></i>
+                        <span>Nuevo</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnPDF">
+                        <i class="fas fa-fw fa-print"></i>
+                        <span>Imprimir</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnExportar">
+                        <i class="fas fa-fw fa-file-excel"></i>
+                        <span>Exportar</span>
+                    </button>
+                </div>
                 <div class="btn-group">
                     <input id="txtBuscar" class="form-control me-2" type="search" placeholder="Filtrar por..." aria-label="Search">
                 </div>
             </nav>
-            </br>
+            <br>
             <table id="personaTable" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
@@ -37,7 +41,6 @@
         </div>
     </div>
 </div>
-
 <!-- Modal para Agregar/Editar Persona -->
 <div class="modal fade" id="personaModal" tabindex="-1" aria-labelledby="personaModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -45,61 +48,58 @@
             <form id="personaForm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="personaModalLabel">Agregar Persona</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="codiPers" name="codiPers">
-                    <div class="mb-3">
-                        <label for="numeDocu" class="form-label">Documento</label>
+                    <div class="mb-4">
+                        <label for="numeDocu" class="form-label d-block mb-2">Documento</label>
                         <input type="text" class="form-control" id="numeDocu" name="numeDocu" required>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="nombPers" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="nombPers" name="nombPers" required>
                     </div>                    
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="suelPers" class="form-label">Sueldo</label>
-                        <input type="number" step="0.01" class="form-control" id="suelPers" name="suelPers" required="">
+                        <input type="number" step="0.01" class="form-control" id="suelPers" name="suelPers" required>
                     </div> 
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="codiAFP" class="form-label">AFP</label>
-                        <select class="form-control" id="codiAFP" name="codiAFP">                            
+                        <select class="form-select" id="codiAFP" name="codiAFP">                            
 
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="codiPlant" class="form-label">Plantilla</label>                       
-                        <select class="form-control" id="codiPlant" name="codiPlant">                            
+                        <select class="form-select" id="codiPlant" name="codiPlant">                            
 
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="codiPlant" class="form-label">Asignacion Familiar</label>  
+                    <div class="mb-4">
+                        <label for="asigFamiPers" class="form-label">Asignación Familiar</label>  
                         <input type="text" class="form-control" id="asigFamiPers" name="asigFamiPers" required>
-
                     </div>
-
-
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="actiPers" class="form-label">Activo</label>
-                        <select class="form-control" id="actiPers" name="actiPers" required>
+                        <select class="form-select" id="actiPers" name="actiPers" required>
                             <option value="true">Sí</option>
                             <option value="false">No</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancel</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-fw fa-undo"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-fw fa-save"></i>Guardar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-
 <script>
     $(document).ready(function () {
         $.getJSON("afpservlet", function (data) {
