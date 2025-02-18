@@ -104,8 +104,7 @@
                 }
             ],
             language: {
-                "emptyTable": "No hay datos disponibles en la tabla",
-                // Más configuraciones de idioma aquí
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
             }
         });
 
@@ -162,101 +161,101 @@
             $('#periodoModal').modal('hide');
         });
         $('#btnPDF').click(function () {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+            const {jsPDF} = window.jspdf;
+            const doc = new jsPDF();
 
-    // Obtener la fecha y hora actual
-    const fechaActual = new Date();
-    const fecha = fechaActual.toLocaleDateString(); // Fecha en formato local
-    const hora = fechaActual.toLocaleTimeString(); // Hora en formato local
-    const fechaHora = `${fecha} ${hora}`;
+            // Obtener la fecha y hora actual
+            const fechaActual = new Date();
+            const fecha = fechaActual.toLocaleDateString(); // Fecha en formato local
+            const hora = fechaActual.toLocaleTimeString(); // Hora en formato local
+            const fechaHora = `${fecha} ${hora}`;
 
-    // Configuración del nombre del sistema
-    const nombreSistema = 'Software de Planilla';
+            // Configuración del nombre del sistema
+            const nombreSistema = 'Software de Planilla';
 
-    // Tamaño de página
-    const pageWidth = doc.internal.pageSize.getWidth();
+            // Tamaño de página
+            const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Agregar fecha y hora (esquina izquierda)
-    doc.setFontSize(8);
-    doc.text(fechaHora, 10, 10); // Posición (X: izquierda, Y: superior)
+            // Agregar fecha y hora (esquina izquierda)
+            doc.setFontSize(8);
+            doc.text(fechaHora, 10, 10); // Posición (X: izquierda, Y: superior)
 
-    // Agregar nombre del sistema (esquina derecha)
-    const textWidthSistema = doc.getTextWidth(nombreSistema);
-    doc.text(nombreSistema, pageWidth - textWidthSistema - 10, 10); // Posición (X: derecha, Y: superior)
+            // Agregar nombre del sistema (esquina derecha)
+            const textWidthSistema = doc.getTextWidth(nombreSistema);
+            doc.text(nombreSistema, pageWidth - textWidthSistema - 10, 10); // Posición (X: derecha, Y: superior)
 
-    // Configuración del título centrado
-    const titulo = 'LISTADO DE PERIODOS';
-    const textWidthTitulo = doc.getTextWidth(titulo);
-    const textX = (pageWidth - textWidthTitulo) / 2;
-    doc.setFontSize(12); // Tamaño de fuente más grande para el título
-    doc.text(titulo, textX, 20);
+            // Configuración del título centrado
+            const titulo = 'LISTADO DE PERIODOS';
+            const textWidthTitulo = doc.getTextWidth(titulo);
+            const textX = (pageWidth - textWidthTitulo) / 2;
+            doc.setFontSize(12); // Tamaño de fuente más grande para el título
+            doc.text(titulo, textX, 20);
 
-    // Obtener encabezados de la tabla
-    const headers = [];
-    $('#periodoTable thead th').each(function (i, header) {
-        if (i < $('#periodoTable thead th').length - 1) {
-            headers.push($(header).text());
-        }
-    });
+            // Obtener encabezados de la tabla
+            const headers = [];
+            $('#periodoTable thead th').each(function (i, header) {
+                if (i < $('#periodoTable thead th').length - 1) {
+                    headers.push($(header).text());
+                }
+            });
 
-    // Obtener filas de la tabla
-    const rows = [];
-    $('#periodoTable tbody tr').each(function () {
-        const row = [];
-        $(this).find('td').each(function (index) {
-            if (index < $(this).parent().find('td').length - 1) {
-                row.push($(this).text());
-            }
+            // Obtener filas de la tabla
+            const rows = [];
+            $('#periodoTable tbody tr').each(function () {
+                const row = [];
+                $(this).find('td').each(function (index) {
+                    if (index < $(this).parent().find('td').length - 1) {
+                        row.push($(this).text());
+                    }
+                });
+                rows.push(row);
+            });
+
+            // Generar la tabla en el PDF
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: 30, // Comienza después del título
+            });
+
+            // Descargar el PDF
+            doc.save('periodo.pdf');
         });
-        rows.push(row);
-    });
 
-    // Generar la tabla en el PDF
-    doc.autoTable({
-        head: [headers],
-        body: rows,
-        startY: 30, // Comienza después del título
-    });
+        $('#btnExportar').click(function () {
+            var tableData = [];
 
-    // Descargar el PDF
-    doc.save('periodo.pdf');
-});
+            // Agregar los encabezados de la tabla como la primera fila
+            var headers = [];
+            $('#periodoTable thead th').each(function (i, header) {
+                if (i < $('#periodoTable thead th').length - 1) {
+                    headers.push($(header).text());
+                }
+            });
+            tableData.push(headers);
 
-$('#btnExportar').click(function () {
-    var tableData = [];
+            // Agregar las filas de datos de la tabla
+            $('#periodoTable tbody tr').each(function () {
+                var rowData = [];
+                $(this).find('td').each(function (i, cell) {
+                    if (i < $(this).parent().find('td').length - 1) {
+                        rowData.push($(cell).text());
+                    }
+                });
+                tableData.push(rowData);
+            });
 
-    // Agregar los encabezados de la tabla como la primera fila
-    var headers = [];
-    $('#periodoTable thead th').each(function (i, header) {
-        if (i < $('#periodoTable thead th').length - 1) {
-            headers.push($(header).text());
-        }
-    });
-    tableData.push(headers);
+            // Crear una hoja de trabajo de Excel a partir del array de datos
+            var ws = XLSX.utils.aoa_to_sheet(tableData);
 
-    // Agregar las filas de datos de la tabla
-    $('#periodoTable tbody tr').each(function () {
-        var rowData = [];
-        $(this).find('td').each(function (i, cell) {
-            if (i < $(this).parent().find('td').length - 1) {
-                rowData.push($(cell).text());
-            }
+            // Crear un libro de trabajo (workbook)
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Periodos');
+
+            // Guardar el archivo Excel
+            XLSX.writeFile(wb, 'periodos.xlsx');
         });
-        tableData.push(rowData);
-    });
 
-    // Crear una hoja de trabajo de Excel a partir del array de datos
-    var ws = XLSX.utils.aoa_to_sheet(tableData);
 
-    // Crear un libro de trabajo (workbook)
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Periodos');
-
-    // Guardar el archivo Excel
-    XLSX.writeFile(wb, 'periodos.xlsx');
-});
-
-        
     });
 </script>

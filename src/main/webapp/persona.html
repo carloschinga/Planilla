@@ -1,27 +1,32 @@
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
-            <h3 class="text-center">Gestión de Personas</h3><br/>
-            <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: white !important; padding: 0;">
-                <div class="d-flex gap-3"> 
-                    <button class="btn btn-primary" id="btnAddPersona">
-                        <i class="fas fa-fw fa-plus me-2"></i>
-                        <span>Nuevo</span>
-                    </button>
-                    <button class="btn btn-primary" id="btnPDF">
-                        <i class="fas fa-fw fa-print"></i>
-                        <span>Imprimir</span>
-                    </button>
-                    <button class="btn btn-primary" id="btnExportar">
-                        <i class="fas fa-fw fa-file-excel"></i>
-                        <span>Exportar</span>
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <input id="txtBuscar" class="form-control me-2" type="search" placeholder="Filtrar por..." aria-label="Search">
+            <div class="d-flex align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">Gestión de Personas</h1>
+            </div>   
+            <nav class="navbar navbar-light bg-white p-2">
+                <div class="container-fluid d-flex align-items-center p-0">
+                    <div class="d-flex align-items-center me-3"></div>
+
+                    <!-- Grupo de Botones -->
+                    <div class="btn-group" style="gap: 1rem;">
+                        <button class="btn btn-primary" id="btnAddPersona">
+                            <i class="fas fa-fw fa-plus me-2"></i>
+                            <span>Nuevo</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnPDF">
+                            <i class="fas fa-fw fa-print"></i>
+                            <span>Imprimir</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnExportar">
+                            <i class="fas fa-fw fa-file-excel"></i>
+                            <span>Exportar</span>
+                        </button>
+
+                    </div>
                 </div>
             </nav>
-            <br>
+            <hr/>
             <table id="personaTable" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
@@ -150,11 +155,9 @@
                     }
                 }
             ],
-            dom: 't',
-            paging: false, // Deshabilita el paginado
-            info: false, // Opcional: Oculta la barra de información de "mostrando X de Y"
+           pageLength: 100,
             language: {
-                emptyTable: "No hay datos disponibles en la tabla"
+                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
             }
         });
 
