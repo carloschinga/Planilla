@@ -15,9 +15,9 @@
 
                     <!-- Grupo de Botones -->
                     <!-- Grupo de Botones -->
-                    <div class="d-flex gap-3 mt-4"> <!-- Se agregó gap-3 y mt-4 para dar espacio entre los botones y margen superior -->
+                    <div class="btn-group"> <!-- Se agregó gap-3 y mt-4 para dar espacio entre los botones y margen superior -->
                         <button class="btn btn-primary" id="btnAddAux">
-                            <i class="fas fa-fw fa-plus me-2"></i>
+                            <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
                         </button>
                         <button class="btn btn-primary" id="btnPDF">
@@ -130,9 +130,9 @@
                     }
                 }
             ],
-             pageLength: 100,
+            pageLength: 100,
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
 
@@ -162,7 +162,7 @@
                 $('#codiAux').val(data.codiAux);
                 $('#nombAux').val(data.nombAux);
                 $('#codiPeri').val(data.codiPeri);
-                $('#actvAux').val(data.actvAux);
+                $('#actvAux').val(data.actvAux ? 'true' : 'false');  // Establecer el valor correctamente en el select
                 $('#auxModalLabel').text('Editar Auxiliar');
                 $('#auxModal').modal('show');
             });

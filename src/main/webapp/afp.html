@@ -6,13 +6,13 @@
             </div>   
             <nav class="navbar navbar-light bg-white p-2">  
                 <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
-                    <!-- Grupo de Botones -->
-                    <div class="btn-group">
-                        <button class="btn btn-primary me-3" id="btnAddAfp">
-                            <i class="fas fa-fw fa-plus me-2"></i>
+                    <!-- Grupo de Botones Imprimir y Exportar (derecha) -->
+                    <div class="btn-group ms-auto">
+                        <button class="btn btn-primary" id="btnAddAfp">
+                            <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
                         </button>
-                        <button class="btn btn-primary me-3" id="btnPDF">
+                        <button class="btn btn-primary" id="btnPDF">
                             <i class="fas fa-fw fa-print"></i>
                             <span>Imprimir</span>
                         </button>
@@ -22,6 +22,7 @@
                         </button>
                     </div>
                 </div>
+
             </nav>
             <hr/>
             <table id="afpTable" class="table table-striped table-bordered" style="width:100%">
@@ -103,8 +104,8 @@
                     }
                 }
             ],
-             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
 

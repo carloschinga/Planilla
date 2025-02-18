@@ -49,7 +49,7 @@ public class AfpServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // Obtener todos los registros
                 List<Afp> afpList = afpDAO.findAfpEntities();
-                afpList.removeIf(afp -> afp.getCodiAFP() == 1);
+                afpList.removeIf(afp -> afp.getCodiAFP() == 1);  // Filtrar si es necesario
                 JSONArray jsonArray = new JSONArray();
                 for (Afp afp : afpList) {
                     JSONObject jsonObject = new JSONObject();
@@ -63,7 +63,7 @@ public class AfpServlet extends HttpServlet {
                 response.getWriter().write(jsonArray.toString());
             } else {
                 // Obtener un registro por ID
-                int id = Integer.parseInt(pathInfo.substring(1));
+                int id = Integer.parseInt(pathInfo.substring(1));  // Obtener ID después del '/'
                 Afp afp = afpDAO.findAfp(id);
                 if (afp != null) {
                     JSONObject jsonObject = new JSONObject();
@@ -75,45 +75,12 @@ public class AfpServlet extends HttpServlet {
                     response.getWriter().write(jsonObject.toString());
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().write(new JSONObject().put("error", "AFP no encontrado").toString());
                 }
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(new JSONObject().put("error", "Error al obtener los datos: " + e.getMessage()).toString());
-        }
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("application/json");
-        String pathInfo = request.getPathInfo();
-
-        try {
-            // Obtener los parámetros del formulario
-            String codiAFP = request.getParameter("codiAFP");
-            String nombAFP = request.getParameter("nombAFP");
-            String montAFP = request.getParameter("montAFP");
-            String seguAFP = request.getParameter("seguAFP");
-            String comiAFP = request.getParameter("comiAFP");
-
-            // Crear el objeto Afp y asignar valores
-            Afp afp = new Afp();
-            afp.setCodiAFP(Integer.parseInt(codiAFP.isEmpty() ? "0" : codiAFP));
-            afp.setNombAFP(nombAFP);
-            afp.setMontAFP(new BigDecimal(montAFP));
-            afp.setSeguAFP(new BigDecimal(seguAFP));
-            afp.setComiAFP(new BigDecimal(comiAFP));
-
-            // Crear registro en la base de datos
-            afpDAO.create(afp);
-
-            // Responder con un mensaje de éxito
-            response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write(new JSONObject().put("message", "Registro creado exitosamente").toString());
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().put("error", "Error al crear el registro: " + e.getMessage()).toString());
         }
     }
 
