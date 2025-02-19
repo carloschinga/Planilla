@@ -7,18 +7,18 @@
     <class>dto.Concepto</class>
     <class>dto.Persona</class>
     <class>dto.Periodo</class>
-    <class>dto.Afp</class>
     <class>dto.Auxiliar</class>
     <class>dto.AuxiliarDetalle</class>
     <class>dto.PlanillaConcepto</class>
     <class>dto.VistaPlanillaConcepto</class>
     <class>dto.VistaPlanilaPersona</class>
     <class>dto.VistaAuxiliarDetallePersona</class>
-    <class>dto.VistaPersonaDetalle</class>
     <class>dto.Rol</class>
     <class>dto.VistaUsuarioRol</class>
     <class>dto.Empresa</class>
     <class>dto.Usuario</class>
+    <class>dto.VistaPersonaDetalle</class>
+    <class>dto.Afp</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\DESKTOP-00B730Q:1433;databaseName=Planilla;trustServerCertificate =true"/>

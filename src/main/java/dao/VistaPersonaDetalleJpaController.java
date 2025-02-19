@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
@@ -95,7 +96,19 @@ public class VistaPersonaDetalleJpaController implements Serializable {
     }
 
     public List<VistaPersonaDetalle> findVistaPersonaDetalleEntities() {
-        return findVistaPersonaDetalleEntities(true, -1, -1);
+        EntityManager em = null;
+        try {
+             em = getEntityManager();
+            TypedQuery<VistaPersonaDetalle> query = em.createQuery(
+                    "SELECT v FROM VistaPersonaDetalle v", VistaPersonaDetalle.class);
+            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+            return  query.getResultList();
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+        //return findVistaPersonaDetalleEntities(true, -1, -1);
     }
 
     public List<VistaPersonaDetalle> findVistaPersonaDetalleEntities(int maxResults, int firstResult) {

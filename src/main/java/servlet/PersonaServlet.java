@@ -8,7 +8,6 @@ import dao.PersonaDAO;
 import dao.VistaPersonaDetalleDAO;
 import dto.Persona;
 import dto.VistaPersonaDetalle;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
@@ -50,6 +49,7 @@ public class PersonaServlet extends HttpServlet {
         response.setContentType("application/json");
         String pathInfo = request.getPathInfo();
 
+        emf.getCache().evict(VistaPersonaDetalleDAO.class);
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // Obtener todos los registros de personas
@@ -60,7 +60,8 @@ public class PersonaServlet extends HttpServlet {
                     jsonObject.put("codiPers", persona.getCodiPers());
                     jsonObject.put("numeDocu", persona.getNumeDocu());
                     jsonObject.put("nombPers", persona.getNombPers());
-                    jsonObject.put("codiAFP", persona.getCodiAFP()); // Relación con AFP
+                    jsonObject.put("snpPers", Boolean.valueOf(persona.getSnpPers())); // Nueva columna agregada
+                    jsonObject.put("codiAFP", persona.getCodiAFP());
                     jsonObject.put("nombAFP", persona.getNombAFP());
                     jsonObject.put("codiPlant", persona.getCodiPlant());
                     jsonObject.put("nombPlant", persona.getNombPlant());
@@ -79,6 +80,7 @@ public class PersonaServlet extends HttpServlet {
                     jsonObject.put("codiPers", persona.getCodiPers());
                     jsonObject.put("numeDocu", persona.getNumeDocu());
                     jsonObject.put("nombPers", persona.getNombPers());
+                    jsonObject.put("snpPers", persona.getSnpPers()); // Nueva columna agregada
                     jsonObject.put("codiAFP", persona.getCodiAFP());
                     jsonObject.put("codiPlant", persona.getCodiPlant());
                     jsonObject.put("actiPers", persona.getActiPers());
@@ -110,6 +112,7 @@ public class PersonaServlet extends HttpServlet {
             String codiPlant = request.getParameter("codiPlant");
             String actiPers = request.getParameter("actiPers");
             String asigFamiPers = request.getParameter("asigFamiPers");
+            String snpPers = request.getParameter("snpPers"); // Nuevo campo agregado
 
             // Validar datos obligatorios
             if (numeDocu == null || nombPers == null || suelPers == null || codiPlant == null || actiPers == null) {
@@ -127,6 +130,9 @@ public class PersonaServlet extends HttpServlet {
             persona.setCodiPlant(Integer.parseInt(codiPlant));
             persona.setActiPers(Boolean.parseBoolean(actiPers));
             persona.setAsigFamiPers(Integer.parseInt(asigFamiPers));
+            persona.setSnpPers(snpPers != null && Boolean.parseBoolean(snpPers));
+            // Asignar el nuevo campo
+
             // Validar sueldo positivo
             if (persona.getSuelPers().compareTo(BigDecimal.ZERO) <= 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -174,9 +180,11 @@ public class PersonaServlet extends HttpServlet {
 
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=");
-                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
-                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
-                parameters.put(key, value);
+                if (keyValue.length == 2) {
+                    String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
+                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
+                    parameters.put(key, value);
+                }
             }
 
             // Log para verificar los parámetros recibidos
@@ -190,34 +198,35 @@ public class PersonaServlet extends HttpServlet {
                 return;
             }
 
-            // Crear la entidad Persona con los datos recibidos
-            Persona persona = new Persona();
-            persona.setCodiPers(Integer.parseInt(codiPers));
-            persona.setNumeDocu(parameters.get("numeDocu"));
-            persona.setNombPers(parameters.get("nombPers"));
-            persona.setSuelPers(new BigDecimal(parameters.get("suelPers")));
-            persona.setCodiAFP(Integer.parseInt(parameters.get("codiAFP")));
-            persona.setCodiPlant(Integer.parseInt(parameters.get("codiPlant")));
-            persona.setActiPers(Boolean.parseBoolean(parameters.get("actiPers")));
-            persona.setAsigFamiPers(Integer.parseInt(parameters.get("asigFamiPers")));
+            // Actualizar los datos de la persona existente
+            personaExistente.setNumeDocu(parameters.get("numeDocu"));
+            personaExistente.setNombPers(parameters.get("nombPers"));
+            personaExistente.setSuelPers(new BigDecimal(parameters.get("suelPers")));
+            personaExistente.setCodiAFP(Integer.parseInt(parameters.get("codiAFP")));
+            personaExistente.setCodiPlant(Integer.parseInt(parameters.get("codiPlant")));
+            personaExistente.setActiPers(Boolean.parseBoolean(parameters.get("actiPers")));
+            personaExistente.setAsigFamiPers(Integer.parseInt(parameters.get("asigFamiPers")));
+            personaExistente.setSnpPers(parameters.get("snpPers") != null && Boolean.parseBoolean(parameters.get("snpPers")));
+            // Nuevo campo agregado
 
             // Log para verificar los datos antes de la actualización
-            System.out.println("Datos a actualizar: " + persona);
+            System.out.println("Datos a actualizar: " + personaExistente);
 
             // Intentar actualizar la persona en la base de datos
-            personaDAO.edit(persona);
+            personaDAO.edit(personaExistente);
 
             // Responder con éxito
             response.setStatus(HttpServletResponse.SC_OK);
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("codiPers", persona.getCodiPers());
-            jsonResponse.put("numeDocu", persona.getNumeDocu());
-            jsonResponse.put("nombPers", persona.getNombPers());
-            jsonResponse.put("codiAFP", persona.getCodiAFP());
-            jsonResponse.put("codiPlant", persona.getCodiPlant());
-            jsonResponse.put("actiPers", persona.getActiPers());
-            jsonResponse.put("suelPers", persona.getSuelPers());
-            jsonResponse.put("asigFamiPers", persona.getAsigFamiPers());
+            jsonResponse.put("codiPers", personaExistente.getCodiPers());
+            jsonResponse.put("numeDocu", personaExistente.getNumeDocu());
+            jsonResponse.put("nombPers", personaExistente.getNombPers());
+            jsonResponse.put("codiAFP", personaExistente.getCodiAFP());
+            jsonResponse.put("codiPlant", personaExistente.getCodiPlant());
+            jsonResponse.put("actiPers", personaExistente.getActiPers());
+            jsonResponse.put("suelPers", personaExistente.getSuelPers());
+            jsonResponse.put("asigFamiPers", personaExistente.getAsigFamiPers());
+            jsonResponse.put("snpPers", personaExistente.getSnpPers()); // Nuevo campo agregado en la respuesta
 
             response.getWriter().write(jsonResponse.toString());
 
@@ -226,8 +235,7 @@ public class PersonaServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(new JSONObject().put("error", "Error en los parámetros: " + e.getMessage()).toString());
             System.err.println("Error en los parámetros: " + e.getMessage());
-        } // Captura errores de formato de número, como los que pueden ocurrir con los IDs o valores numéricos
-        catch (Exception e) {
+        } catch (Exception e) {
             // Captura cualquier otro error inesperado
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(new JSONObject().put("error", "Error al procesar la solicitud: " + e.getMessage()).toString());

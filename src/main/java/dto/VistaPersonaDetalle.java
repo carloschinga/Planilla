@@ -15,7 +15,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -23,7 +22,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name = "vista_persona_detalle")
-@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "VistaPersonaDetalle.findAll", query = "SELECT v FROM VistaPersonaDetalle v"),
     @NamedQuery(name = "VistaPersonaDetalle.findByCodiPers", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.codiPers = :codiPers"),
@@ -37,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "VistaPersonaDetalle.findByComiAFP", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.comiAFP = :comiAFP"),
     @NamedQuery(name = "VistaPersonaDetalle.findByActiPers", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.actiPers = :actiPers"),
     @NamedQuery(name = "VistaPersonaDetalle.findByAsigFamiPers", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.asigFamiPers = :asigFamiPers"),
+    @NamedQuery(name = "VistaPersonaDetalle.findBySnpPers", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.snpPers = :snpPers"),
     @NamedQuery(name = "VistaPersonaDetalle.findByCodiPlant", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.codiPlant = :codiPlant"),
     @NamedQuery(name = "VistaPersonaDetalle.findByNombPlant", query = "SELECT v FROM VistaPersonaDetalle v WHERE v.nombPlant = :nombPlant")})
 public class VistaPersonaDetalle implements Serializable {
@@ -77,6 +76,10 @@ public class VistaPersonaDetalle implements Serializable {
     private boolean actiPers;
     @Column(name = "asigFamiPers")
     private Integer asigFamiPers;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "snpPers")
+    private boolean snpPers;
     @Column(name = "codiPlant")
     private Integer codiPlant;
     @Size(max = 50)
@@ -172,6 +175,14 @@ public class VistaPersonaDetalle implements Serializable {
 
     public void setAsigFamiPers(Integer asigFamiPers) {
         this.asigFamiPers = asigFamiPers;
+    }
+
+    public boolean getSnpPers() {
+        return snpPers;
+    }
+
+    public void setSnpPers(boolean snpPers) {
+        this.snpPers = snpPers;
     }
 
     public Integer getCodiPlant() {

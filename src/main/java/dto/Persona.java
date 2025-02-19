@@ -17,7 +17,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -25,12 +24,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name = "Persona")
-@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Persona.findAll", query = "SELECT p FROM Persona p"),
     @NamedQuery(name = "Persona.findByCodiPers", query = "SELECT p FROM Persona p WHERE p.codiPers = :codiPers"),
     @NamedQuery(name = "Persona.findByNumeDocu", query = "SELECT p FROM Persona p WHERE p.numeDocu = :numeDocu"),
     @NamedQuery(name = "Persona.findByNombPers", query = "SELECT p FROM Persona p WHERE p.nombPers = :nombPers"),
+    @NamedQuery(name = "Persona.findBySnpPers", query = "SELECT p FROM Persona p WHERE p.snpPers = :snpPers"),
     @NamedQuery(name = "Persona.findByCodiAFP", query = "SELECT p FROM Persona p WHERE p.codiAFP = :codiAFP"),
     @NamedQuery(name = "Persona.findByActiPers", query = "SELECT p FROM Persona p WHERE p.actiPers = :actiPers"),
     @NamedQuery(name = "Persona.findByCodiPlant", query = "SELECT p FROM Persona p WHERE p.codiPlant = :codiPlant"),
@@ -54,6 +53,10 @@ public class Persona implements Serializable {
     @Size(min = 1, max = 200)
     @Column(name = "nombPers")
     private String nombPers;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "snpPers")
+    private boolean snpPers;
     @Column(name = "codiAFP")
     private Integer codiAFP;
     @Basic(optional = false)
@@ -75,10 +78,11 @@ public class Persona implements Serializable {
         this.codiPers = codiPers;
     }
 
-    public Persona(Integer codiPers, String numeDocu, String nombPers, boolean actiPers) {
+    public Persona(Integer codiPers, String numeDocu, String nombPers, boolean snpPers, boolean actiPers) {
         this.codiPers = codiPers;
         this.numeDocu = numeDocu;
         this.nombPers = nombPers;
+        this.snpPers = snpPers;
         this.actiPers = actiPers;
     }
 
@@ -104,6 +108,14 @@ public class Persona implements Serializable {
 
     public void setNombPers(String nombPers) {
         this.nombPers = nombPers;
+    }
+
+    public boolean getSnpPers() {
+        return snpPers;
+    }
+
+    public void setSnpPers(boolean snpPers) {
+        this.snpPers = snpPers;
     }
 
     public Integer getCodiAFP() {

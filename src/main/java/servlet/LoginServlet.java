@@ -27,14 +27,26 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "LoginServlet", urlPatterns = {"/loginservlet"})
 public class LoginServlet extends HttpServlet {
 
-    private final VistaUsuarioRolDAO vistaUsuarioRolDAO;
+    private VistaUsuarioRolDAO vistaUsuarioRolDAO;
     private final EmpresaDAO empresaDAO;
     private final EntityManagerFactory emf;
 
     public LoginServlet() {
-        this.emf = Persistence.createEntityManagerFactory("com.mycompany_Planilla_war_1.0-SNAPSHOTPU");
-        this.vistaUsuarioRolDAO = new VistaUsuarioRolDAO(emf);
-        this.empresaDAO = new EmpresaDAO(emf);
+        EntityManagerFactory tempEmf = null;
+        VistaUsuarioRolDAO tempVistaUsuarioRolDAO = null;
+        EmpresaDAO tempEmpresaDAO = null;
+
+        try {
+            tempEmf = Persistence.createEntityManagerFactory("com.mycompany_Planilla_war_1.0-SNAPSHOTPU");
+            tempVistaUsuarioRolDAO = new VistaUsuarioRolDAO(tempEmf);
+            tempEmpresaDAO = new EmpresaDAO(tempEmf);
+        } catch (Exception ex) {
+            System.out.println("Error al inicializar DAOs: " + ex.getMessage());
+        }
+
+        this.emf = tempEmf;
+        this.vistaUsuarioRolDAO = tempVistaUsuarioRolDAO;
+        this.empresaDAO = tempEmpresaDAO;
     }
 
     @Override
@@ -42,6 +54,11 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         String logiUsua = request.getParameter("logiUsua");
         String passUsua = request.getParameter("passUsua");
+
+        if (vistaUsuarioRolDAO == null || empresaDAO == null) {
+            response.getWriter().print("Error de configuración del servidor");
+            return;
+        }
 
         VistaUsuarioRol usuario = vistaUsuarioRolDAO.validarUsuario(logiUsua, passUsua);
 
@@ -56,12 +73,12 @@ public class LoginServlet extends HttpServlet {
                 Empresa empresa = listaEmpresa.get(0);
 
                 HttpSession session = request.getSession();
-                session.setAttribute("codiUsua", usuario.getCodiUsua()); // Código real
+                session.setAttribute("codiUsua", usuario.getCodiUsua());
                 session.setAttribute("logiUsua", usuario.getLogiUsua());
                 session.setAttribute("nombUsua", usuario.getNombUsua());
-                session.setAttribute("codiRol", usuario.getCodiRol()); // Código de rol real
-                session.setAttribute("nombRol", usuario.getNombRol()); // Nombre de rol real
-                session.setAttribute("admiRol", usuario.getAdmiRol()); // ¿Es administrador?
+                session.setAttribute("codiRol", usuario.getCodiRol());
+                session.setAttribute("nombRol", usuario.getNombRol());
+                session.setAttribute("admiRol", usuario.getAdmiRol());
                 session.setAttribute("codiEmpr", empresa.getCodiEmpr());
                 session.setAttribute("nrucEmpr", empresa.getNrucEmpr());
                 session.setAttribute("nombEmpr", empresa.getNombEmpr());
