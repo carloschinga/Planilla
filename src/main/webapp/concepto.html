@@ -425,7 +425,7 @@
                 $('#codiPlant').val($('#cmbPlantilla').val()); // Aquí se asigna el valor seleccionado al campo
 
                 $('#nombConc').val(data.nombConc);
-                $('#formula').val(data.formula);
+                $('#formula').val(data.formula ? 'true' : 'false');
                 $('#valor').val(data.valor);
                 $('#ordnConc').val(data.ordnConc);
                 // Asegúrate de asignar el valor 'visible' correctamente
