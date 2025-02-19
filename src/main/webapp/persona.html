@@ -9,9 +9,9 @@
                     <div class="d-flex align-items-center me-3"></div>
 
                     <!-- Grupo de Botones -->
-                    <div class="btn-group" style="gap: 1rem;">
+                    <div class="btn-group">
                         <button class="btn btn-primary" id="btnAddPersona">
-                            <i class="fas fa-fw fa-plus me-2"></i>
+                            <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
                         </button>
                         <button class="btn btn-primary" id="btnPDF">
@@ -155,30 +155,46 @@
                     }
                 }
             ],
-           pageLength: 100,
+            pageLength: 100,
             language: {
                 url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
             }
         });
 
         // Agregar o Editar Persona
+        // Suponiendo que tienes un formulario que envía los datos para editar
         $('#personaForm').submit(function (e) {
             e.preventDefault();
-            const formData = $(this).serialize();
-            const id = $('#codiPers').val();
-            const url = id ? `personaservlet/${id}` : 'personaservlet';
-            const method = id ? 'PUT' : 'POST';
 
+            // Obtener datos del formulario
+            const formData = $(this).serialize();
+            const codiPers = $('#codiPers').val(); // Suponiendo que tienes un campo para el ID de la persona
+            const url = `/personaservlet/${codiPers}`;
+            const method = 'PUT';
+
+            // Enviar la solicitud PUT al servlet
             $.ajax({
                 url: url,
                 type: method,
                 data: formData,
-                success: function () {
+                success: function (updatedPersona) {
+                    // Actualizar la fila de la tabla
+                    const row = $('#tablaPersonas').find(`tr[data-codiPers="${updatedPersona.codiPers}"]`);
+                    row.find('.numeDocu').text(updatedPersona.numeDocu);
+                    row.find('.nombPers').text(updatedPersona.nombPers);
+                    row.find('.suelPers').text(updatedPersona.suelPers);
+                    row.find('.codiAFP').text(updatedPersona.codiAFP);
+                    row.find('.actiPers').text(updatedPersona.actiPers ? 'Activo' : 'Inactivo');
+
+                    // Cerrar el modal o formulario
                     $('#personaModal').modal('hide');
-                    personaTable.ajax.reload();
+                },
+                error: function () {
+                    alert('Hubo un error al actualizar los datos.');
                 }
             });
         });
+
         $('#txtBuscar').on('input', function () {
             personaTable.search(this.value).draw();
         });

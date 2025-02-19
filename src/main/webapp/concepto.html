@@ -5,12 +5,12 @@
         width: 100%;
         max-width: 900px;
         margin: auto;
-        font-size: 14px;
-        table-layout: auto; /* Asegura que el tamaño de las columnas se ajuste automáticamente */
+        font-size: 16px;
+        table-layout: fixed; /* Asegura que el tamaño de las columnas se ajuste automáticamente */
         word-wrap: break-word; /* Permite que el texto largo se ajuste sin cortar */
     }
 
-    /* Estilos para las celdas de la tabla */
+    /* Estilos para las eldas de la tabla */
     #conceptoTable th,
     #conceptoTable td {
         white-space: normal; /* Permite que el texto ocupe más de una línea si es necesario */
@@ -62,7 +62,7 @@
 
     #conceptoTable th:nth-child(9),
     #conceptoTable td:nth-child(9) {
-        width: 20%; /* Acciones */
+        width: 22%; /* Acciones */
         text-align: center;
     }
 
@@ -88,23 +88,23 @@
                     <div class="d-flex align-items-center me-3"></div>
 
                     <!-- Grupo de Botones -->
-                    <div class="btn-group" style="gap: 1rem;">
+                    <div class="btn-group">
                         <div class="btn-group">
                             <select id="cmbPlantilla" class="form-select"></select>
                         </div>
-                        <button class="btn btn-primary me-2" id="btnAddConcepto">
-                            <i class="fas fa-fw fa-plus me-2"></i>
+                        <button class="btn btn-primary" id="btnAddConcepto">
+                            <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
                         </button>
-                        <button class="btn btn-primary me-2" id="btnPDF">
+                        <button class="btn btn-primary" id="btnPDF">
                             <i class="fas fa-fw fa-print"></i>
                             <span>Imprimir</span>
                         </button>
-                        <button class="btn btn-primary me-2" id="btnExportar">
+                        <button class="btn btn-primary" id="btnExportar">
                             <i class="fas fa-fw fa-file-excel"></i>
                             <span>Exportar</span>
                         </button>
-                        <button class="btn btn-primary me-2" id="btnClonar">
+                        <button class="btn btn-primary" id="btnClonar">
                             <i class="fas fa-fw fa-clone"></i>
                             <span>Clonar</span>
                         </button>
@@ -287,7 +287,8 @@
                     render: function (data, type, row) {
                         return `
                             <button class="btn btn-primary btn-sm btnEdit" data-id="${row.codiConc}">
-                                <i class="fas fa-edit"></i> Editar
+                                <i class="fas fa-edit"></i>
+        
                             </button>
                         `;
                     }
@@ -295,7 +296,7 @@
             ],
             pageLength: 100,
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
         // Filtrar la tabla por búsqueda
@@ -412,21 +413,6 @@
 
 
 
-        // Editar concepto
-        $('#conceptoTable tbody').on('click', '.btnEdit', function () {
-            const id = $(this).data('id');
-            $.get('conceptoservlet/' + id, function (data) {
-                $('#codiConc').val(data.codiConc);
-                $('#codiPlant').val();
-                $('#nombConc').val(data.nombConc);
-                $('#formula').val(data.formula);
-                $('#valor').val(data.valor);
-                $('#ordnConc').val(data.ordnConc);
-                $('#visible').val(data.visible);
-                $('#conceptoModalLabel').text('Editar Concepto');
-                $('#conceptoModal').modal('show');
-            });
-        });
 
 
         // Eliminar concepto
@@ -442,7 +428,8 @@
                 $('#formula').val(data.formula);
                 $('#valor').val(data.valor);
                 $('#ordnConc').val(data.ordnConc);
-                $('#visible').val(data.visible);
+                // Asegúrate de asignar el valor 'visible' correctamente
+                $('#visible').val(data.visible ? 'true' : 'false');  // Aquí se asigna el valor de 'visible'
                 $('#conceptoModalLabel').text('Editar Concepto');
                 $('#conceptoModal').modal('show');
             });
