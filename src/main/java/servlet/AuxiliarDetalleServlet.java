@@ -46,57 +46,61 @@ public class AuxiliarDetalleServlet extends HttpServlet {
         response.setContentType("application/json");
         String pathInfo = request.getPathInfo();
 
-          // Obtener el parámetro 'auxiliar'
+        // Obtener el parámetro 'auxiliar'
         String auxiliarParam = request.getParameter("auxiliar");
         int auxiliarId = 1; // Valor predeterminado
-        
-        try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                
-                if (auxiliarParam != null && !auxiliarParam.isEmpty()) {
-                    try {
-                        auxiliarId = Integer.parseInt(auxiliarParam); // Convertir a entero
-                    } catch (NumberFormatException e) {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().write("{\"error\":\"El parámetro 'auxiliar' debe ser un número entero válido\"}");
-                        return;
+
+        if (auxiliarParam == null) {
+            JSONObject jsonObject = new JSONObject();
+            response.getWriter().write(jsonObject.toString());
+        } else {
+            try {
+                if (pathInfo == null || pathInfo.equals("/")) {
+
+                    if (auxiliarParam != null && !auxiliarParam.isEmpty()) {
+                        try {
+                            auxiliarId = Integer.parseInt(auxiliarParam); // Convertir a entero
+                        } catch (NumberFormatException e) {
+                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            response.getWriter().write("{\"error\":\"El parámetro 'auxiliar' debe ser un número entero válido\"}");
+                            return;
+                        }
+                    }
+
+                    // Obtener todos los registros
+                    List<VistaAuxiliarDetallePersona> auxiliarDetalleList = auxiliarDetalleDAO.findAuxiliarByPeriodo(auxiliarId);
+                    JSONArray jsonArray = new JSONArray();
+                    for (VistaAuxiliarDetallePersona detalle : auxiliarDetalleList) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("codiDetaAux", detalle.getCodiDetaAux());
+                        jsonObject.put("codiAux", detalle.getCodiAux());
+                        jsonObject.put("codiPers", detalle.getCodiPers());
+                        jsonObject.put("nombPers", detalle.getNombPers());
+                        jsonObject.put("descDeta", detalle.getDescDeta());
+                        jsonObject.put("montDeta", detalle.getMontDeta());
+                        jsonArray.put(jsonObject);
+                    }
+                    response.getWriter().write(jsonArray.toString());
+                } else {
+                    // Obtener un registro por ID
+                    int id = Integer.parseInt(pathInfo.substring(1));
+                    AuxiliarDetalle detalle = auxiliarDetalleDAO.findAuxiliarDetalle(id);
+                    if (detalle != null) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("codiDetaAux", detalle.getCodiDetaAux());
+                        jsonObject.put("codiAux", detalle.getCodiAux());
+                        jsonObject.put("codiPers", detalle.getCodiPers());
+                        jsonObject.put("descDeta", detalle.getDescDeta());
+                        jsonObject.put("montDeta", detalle.getMontDeta());
+                        response.getWriter().write(jsonObject.toString());
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     }
                 }
-                
-                
-                // Obtener todos los registros
-                List<VistaAuxiliarDetallePersona> auxiliarDetalleList = auxiliarDetalleDAO.findAuxiliarByPeriodo(auxiliarId);
-                JSONArray jsonArray = new JSONArray();
-                for (VistaAuxiliarDetallePersona detalle : auxiliarDetalleList) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("codiDetaAux", detalle.getCodiDetaAux());
-                    jsonObject.put("codiAux", detalle.getCodiAux());
-                    jsonObject.put("codiPers", detalle.getCodiPers());
-                    jsonObject.put("nombPers", detalle.getNombPers());
-                    jsonObject.put("descDeta", detalle.getDescDeta());
-                    jsonObject.put("montDeta", detalle.getMontDeta());
-                    jsonArray.put(jsonObject);
-                }
-                response.getWriter().write(jsonArray.toString());
-            } else {
-                // Obtener un registro por ID
-                int id = Integer.parseInt(pathInfo.substring(1));
-                AuxiliarDetalle detalle = auxiliarDetalleDAO.findAuxiliarDetalle(id);
-                if (detalle != null) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("codiDetaAux", detalle.getCodiDetaAux());
-                    jsonObject.put("codiAux", detalle.getCodiAux());
-                    jsonObject.put("codiPers", detalle.getCodiPers());
-                    jsonObject.put("descDeta", detalle.getDescDeta());
-                    jsonObject.put("montDeta", detalle.getMontDeta());
-                    response.getWriter().write(jsonObject.toString());
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                }
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write(new JSONObject().put("error", "Error al obtener los datos: " + e.getMessage()).toString());
             }
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().put("error", "Error al obtener los datos: " + e.getMessage()).toString());
         }
     }
 

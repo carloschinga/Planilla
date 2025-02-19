@@ -9,13 +9,14 @@
             <nav class="navbar navbar-light bg-white p-2">
                 <div class="container-fluid d-flex align-items-center p-0">
                     <!-- Selector de Periodo -->
-                    <div class="d-flex align-items-center me-3">
-                        <select id="cmbPeriodo" class="form-control form-control-user" style="width: auto;"></select>
-                    </div>
 
+                    <div class="d-flex align-items-center me-3">
+                    </div>
                     <!-- Grupo de Botones -->
                     <!-- Grupo de Botones -->
                     <div class="btn-group"> <!-- Se agregó gap-3 y mt-4 para dar espacio entre los botones y margen superior -->
+                        <select id="cmbPeriodo" class="form-control form-control-user" style="width: auto;"></select>
+
                         <button class="btn btn-primary" id="btnAddAux">
                             <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
@@ -40,7 +41,7 @@
                     <tr>
                         <th>Código</th>
                         <th>Nombre</th>
-                        <th>Código Período</th>
+                        <!--<th>Código Período</th>-->
                         <th>Activo</th>
                         <th>Acciones</th>
                     </tr>
@@ -65,11 +66,12 @@
                     <div class="mb-4">
                         <label for="nombAux" class="form-label d-block mb-2">Nombre</label>
                         <input type="text" class="form-control" id="nombAux" name="nombAux" required>
+                        <input type="hidden" class="form-control" id="codiPeri" name="codiPeri" required>
                     </div>
-                    <div class="mb-4">
+                    <!--<div class="mb-4">
                         <label for="codiPeri" class="form-label">Código Período</label>
                         <input type="number" class="form-control" id="codiPeri" name="codiPeri" required>
-                    </div>
+                    </div>-->
                     <div class="mb-4">
                         <label for="actvAux" class="form-label">Activo</label>
                         <select class="form-control" id="actvAux" name="actvAux" required>
@@ -102,6 +104,8 @@
             $.each(data, function (index, periodo) {
                 select.append('<option value="' + periodo.codiPeri + '">' + periodo.nombPeri + '</option>');
             });
+            
+             $('#codiPeri').val($('#cmbPeriodo').val());
         }).fail(function () {
             alert("error");
             //$('#plantilla-container').html('<p>Error al cargar las plantillas.</p>');
@@ -116,7 +120,7 @@
             columns: [
                 {data: 'codiAux'},
                 {data: 'nombAux'},
-                {data: 'codiPeri'},
+                //{data: 'codiPeri'},
 
                 {data: 'actvAux', render: function (data) {
                         return data ? 'Sí' : 'No';
@@ -139,7 +143,7 @@
         // Agregar o Editar Auxiliar
         $('#auxForm').submit(function (e) {
             e.preventDefault();
-            const formData = $(this).serialize();
+            const formData = $(this).serialize();            
             const id = $('#codiAux').val();
             const url = id ? `auxiliarservlet/${id}` : 'auxiliarservlet';
             const method = id ? 'PUT' : 'POST';
@@ -161,7 +165,7 @@
             $.get(`auxiliarservlet/${id}`, function (data) {
                 $('#codiAux').val(data.codiAux);
                 $('#nombAux').val(data.nombAux);
-                $('#codiPeri').val(data.codiPeri);
+                $('#codiPeri').val($('#cmbPeriodo').val());
                 $('#actvAux').val(data.actvAux ? 'true' : 'false');  // Establecer el valor correctamente en el select
                 $('#auxModalLabel').text('Editar Auxiliar');
                 $('#auxModal').modal('show');
