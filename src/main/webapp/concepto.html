@@ -228,8 +228,14 @@
                         return ['SISTEMA', 'INGRESOS', 'EGRESOS', 'APORTES', 'TOTAL'][data - 1];
                     }
                 },
-                {data: 'formula'},
-                {data: 'valor'},
+                {data: 'formula', render: function (data) {
+                        return data ? data : ''; // Si es null, devuelve cadena vacía
+                    }
+                },
+                {data: 'valor', render: function (data) {
+                        return data !== null ? data : ''; // Si es null, devuelve cadena vacía
+                    }
+                },
                 {data: 'visible', render: function (data) {
                         return data ? 'Sí' : 'No';
                     }
@@ -369,7 +375,7 @@
         $('#conceptoTable tbody').on('click', '.btnEdit', function () {
             const id = $(this).data('id');
             $.get('conceptoservlet/' + id, function (data) {
-                
+
                 console.log(data);
                 $('#codiConc').val(data.codiConc);
 
@@ -380,9 +386,9 @@
                 $('#formula').val(data.formula);
                 $('#valor').val(data.valor);
                 $('#ordnConc').val(data.ordnConc);
-                
-                $('#cateConc').val(data.cateConc );
-                $('#tipoConc').val(data.tipoConc );
+
+                $('#cateConc').val(data.cateConc);
+                $('#tipoConc').val(data.tipoConc);
                 // Asegúrate de asignar el valor 'visible' correctamente
                 $('#visible').val(data.visible ? 'true' : 'false');  // Aquí se asigna el valor de 'visible'
                 $('#conceptoModalLabel').text('Editar Concepto');
