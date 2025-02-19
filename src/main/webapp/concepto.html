@@ -229,11 +229,11 @@
                     }
                 },
                 {data: 'formula', render: function (data) {
-                        return data ? data : ''; // Si es null, devuelve cadena vacía
+                        return data !== undefined && data !== null ? data : ''; // Evita errores si es null o undefined
                     }
                 },
                 {data: 'valor', render: function (data) {
-                        return data !== null ? data : ''; // Si es null, devuelve cadena vacía
+                        return data !== undefined && data !== null ? data : ''; // Evita errores si es null o undefined
                     }
                 },
                 {data: 'visible', render: function (data) {
