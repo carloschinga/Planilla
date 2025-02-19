@@ -1,3 +1,15 @@
+<style>
+    /* Ajuste del ancho de la tabla */
+    #personaTable {
+        width: 100%;
+        max-width: 900px;
+        margin: auto;
+        font-size: 16px;
+        table-layout: fixed; /* Asegura que el tamaño de las columnas se ajuste automáticamente */
+        word-wrap: break-word; /* Permite que el texto largo se ajuste sin cortar */
+    }
+</style>
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
@@ -48,7 +60,7 @@
 </div>
 <!-- Modal para Agregar/Editar Persona -->
 <div class="modal fade" id="personaModal" tabindex="-1" aria-labelledby="personaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="personaForm">
                 <div class="modal-header">
@@ -57,40 +69,50 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="codiPers" name="codiPers">
-                    <div class="mb-4">
-                        <label for="numeDocu" class="form-label d-block mb-2">Documento</label>
-                        <input type="text" class="form-control" id="numeDocu" name="numeDocu" required>
+                    <!-- Row for two columns -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="numeDocu" class="form-label d-block mb-2">Documento</label>
+                            <input type="text" class="form-control" id="numeDocu" name="numeDocu" required>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="nombPers" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombPers" name="nombPers" required>
+                        </div>                    
                     </div>
-                    <div class="mb-4">
-                        <label for="nombPers" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="nombPers" name="nombPers" required>
-                    </div>                    
-                    <div class="mb-4">
-                        <label for="suelPers" class="form-label">Sueldo</label>
-                        <input type="number" step="0.01" class="form-control" id="suelPers" name="suelPers" required>
-                    </div> 
-                    <div class="mb-4">
-                        <label for="codiAFP" class="form-label">AFP</label>
-                        <select class="form-select" id="codiAFP" name="codiAFP">                            
-
-                        </select>
+                    <!-- Row for two columns -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="suelPers" class="form-label">Sueldo</label>
+                            <input type="number" step="0.01" class="form-control" id="suelPers" name="suelPers" required>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="codiAFP" class="form-label">AFP</label>
+                            <select class="form-select" id="codiAFP" name="codiAFP">                            
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label for="codiPlant" class="form-label">Plantilla</label>                       
-                        <select class="form-select" id="codiPlant" name="codiPlant">                            
-
-                        </select>
+                    <!-- Row for two columns -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="codiPlant" class="form-label">Plantilla</label>
+                            <select class="form-select" id="codiPlant" name="codiPlant">                            
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="asigFamiPers" class="form-label">Asignación Familiar</label>  
+                            <input type="text" class="form-control" id="asigFamiPers" name="asigFamiPers" required>
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label for="asigFamiPers" class="form-label">Asignación Familiar</label>  
-                        <input type="text" class="form-control" id="asigFamiPers" name="asigFamiPers" required>
-                    </div>
-                    <div class="mb-4">
-                        <label for="actiPers" class="form-label">Activo</label>
-                        <select class="form-select" id="actiPers" name="actiPers" required>
-                            <option value="true">Sí</option>
-                            <option value="false">No</option>
-                        </select>
+                    <!-- Row for the last field -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="actiPers" class="form-label">Activo</label>
+                            <select class="form-select" id="actiPers" name="actiPers" required>
+                                <option value="true">Sí</option>
+                                <option value="false">No</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -105,6 +127,8 @@
         </div>
     </div>
 </div>
+
+
 <script>
     $(document).ready(function () {
         $.getJSON("afpservlet", function (data) {
@@ -155,46 +179,33 @@
                     }
                 }
             ],
-            pageLength: 100,
+            dom: 't',
+            paging: false, // Deshabilita el paginado
+            info: false, // Opcional: Oculta la barra de información de "mostrando X de Y"
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json'
+                emptyTable: "No hay datos disponibles en la tabla"
             }
         });
 
         // Agregar o Editar Persona
-        // Suponiendo que tienes un formulario que envía los datos para editar
         $('#personaForm').submit(function (e) {
             e.preventDefault();
-
-            // Obtener datos del formulario
             const formData = $(this).serialize();
-            const codiPers = $('#codiPers').val(); // Suponiendo que tienes un campo para el ID de la persona
-            const url = `/personaservlet/${codiPers}`;
-            const method = 'PUT';
+            const id = $('#codiPers').val();
+            const url = id ? `personaservlet/${id}` : 'personaservlet';
+            const method = id ? 'PUT' : 'POST';
 
-            // Enviar la solicitud PUT al servlet
             $.ajax({
                 url: url,
                 type: method,
                 data: formData,
-                success: function (updatedPersona) {
-                    // Actualizar la fila de la tabla
-                    const row = $('#tablaPersonas').find(`tr[data-codiPers="${updatedPersona.codiPers}"]`);
-                    row.find('.numeDocu').text(updatedPersona.numeDocu);
-                    row.find('.nombPers').text(updatedPersona.nombPers);
-                    row.find('.suelPers').text(updatedPersona.suelPers);
-                    row.find('.codiAFP').text(updatedPersona.codiAFP);
-                    row.find('.actiPers').text(updatedPersona.actiPers ? 'Activo' : 'Inactivo');
-
-                    // Cerrar el modal o formulario
+                success: function () {
                     $('#personaModal').modal('hide');
-                },
-                error: function () {
-                    alert('Hubo un error al actualizar los datos.');
+                    personaTable.ajax.reload(null, false); // Mantener la posición actual de la tabla
+
                 }
             });
         });
-
         $('#txtBuscar').on('input', function () {
             personaTable.search(this.value).draw();
         });

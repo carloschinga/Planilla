@@ -136,6 +136,7 @@ public class PersonaServlet extends HttpServlet {
 
             // Guardar persona
             personaDAO.create(persona);
+            emf.createEntityManager().flush();  // Sincroniza los cambios en la base de datos
 
             // Respuesta de éxito
             response.setStatus(HttpServletResponse.SC_CREATED);
@@ -152,79 +153,89 @@ public class PersonaServlet extends HttpServlet {
     }
 
     @Override
-protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    response.setContentType("application/json");
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
 
-    try {
-        // Obtener la información de la solicitud
-        String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            throw new IllegalArgumentException("El ID de la persona no está presente en la URL.");
+        try {
+            // Obtener la información de la solicitud
+            String pathInfo = request.getPathInfo();
+            if (pathInfo == null || pathInfo.length() <= 1) {
+                throw new IllegalArgumentException("El ID de la persona no está presente en la URL.");
+            }
+
+            // Obtener el ID de la persona de la URL
+            String codiPers = pathInfo.substring(1);
+            System.out.println("ID de la persona recibido: " + codiPers);  // Log para ver el ID recibido
+
+            // Leer los parámetros del cuerpo de la solicitud
+            Map<String, String> parameters = new HashMap<>();
+            String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            String[] pairs = body.split("&");
+
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
+                parameters.put(key, value);
+            }
+
+            // Log para verificar los parámetros recibidos
+            System.out.println("Parámetros recibidos: " + parameters.toString());
+
+            // Verificar si la persona existe en la base de datos
+            Persona personaExistente = personaDAO.findPersona(Integer.parseInt(codiPers));
+            if (personaExistente == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().write(new JSONObject().put("error", "Persona no encontrada").toString());
+                return;
+            }
+
+            // Crear la entidad Persona con los datos recibidos
+            Persona persona = new Persona();
+            persona.setCodiPers(Integer.parseInt(codiPers));
+            persona.setNumeDocu(parameters.get("numeDocu"));
+            persona.setNombPers(parameters.get("nombPers"));
+            persona.setSuelPers(new BigDecimal(parameters.get("suelPers")));
+            persona.setCodiAFP(Integer.parseInt(parameters.get("codiAFP")));
+            persona.setCodiPlant(Integer.parseInt(parameters.get("codiPlant")));
+            persona.setActiPers(Boolean.parseBoolean(parameters.get("actiPers")));
+            persona.setAsigFamiPers(Integer.parseInt(parameters.get("asigFamiPers")));
+
+            // Log para verificar los datos antes de la actualización
+            System.out.println("Datos a actualizar: " + persona);
+
+            // Intentar actualizar la persona en la base de datos
+            personaDAO.edit(persona);
+
+            // Responder con éxito
+            response.setStatus(HttpServletResponse.SC_OK);
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("codiPers", persona.getCodiPers());
+            jsonResponse.put("numeDocu", persona.getNumeDocu());
+            jsonResponse.put("nombPers", persona.getNombPers());
+            jsonResponse.put("codiAFP", persona.getCodiAFP());
+            jsonResponse.put("codiPlant", persona.getCodiPlant());
+            jsonResponse.put("actiPers", persona.getActiPers());
+            jsonResponse.put("suelPers", persona.getSuelPers());
+            jsonResponse.put("asigFamiPers", persona.getAsigFamiPers());
+
+            response.getWriter().write(jsonResponse.toString());
+
+        } catch (IllegalArgumentException e) {
+            // Captura errores relacionados con parámetros inválidos
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject().put("error", "Error en los parámetros: " + e.getMessage()).toString());
+            System.err.println("Error en los parámetros: " + e.getMessage());
+        } // Captura errores de formato de número, como los que pueden ocurrir con los IDs o valores numéricos
+        catch (Exception e) {
+            // Captura cualquier otro error inesperado
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(new JSONObject().put("error", "Error al procesar la solicitud: " + e.getMessage()).toString());
+            System.err.println("Error inesperado: " + e.getMessage());
+            e.printStackTrace();  // Imprime el stack trace completo para depuración
         }
-
-        // Obtener el ID de la persona de la URL
-        String codiPers = pathInfo.substring(1);
-        System.out.println("ID de la persona recibido: " + codiPers);  // Log para ver el ID recibido
-
-        // Leer los parámetros del cuerpo de la solicitud
-        Map<String, String> parameters = new HashMap<>();
-        String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        String[] pairs = body.split("&");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.split("=");
-            String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
-            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
-            parameters.put(key, value);
-        }
-
-        // Log para verificar los parámetros recibidos
-        System.out.println("Parámetros recibidos: " + parameters.toString());
-
-        // Verificar si la persona existe en la base de datos
-        Persona personaExistente = personaDAO.findPersona(Integer.parseInt(codiPers));
-        if (personaExistente == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(new JSONObject().put("error", "Persona no encontrada").toString());
-            return;
-        }
-
-        // Crear la entidad Persona con los datos recibidos
-        Persona persona = new Persona();
-        persona.setCodiPers(Integer.parseInt(codiPers));
-        persona.setNumeDocu(parameters.get("numeDocu"));
-        persona.setNombPers(parameters.get("nombPers"));
-        persona.setSuelPers(new BigDecimal(parameters.get("suelPers")));
-        persona.setCodiAFP(Integer.parseInt(parameters.get("codiAFP")));
-        persona.setCodiPlant(Integer.parseInt(parameters.get("codiPlant")));
-        persona.setActiPers(Boolean.parseBoolean(parameters.get("actiPers")));
-        persona.setAsigFamiPers(Integer.parseInt(parameters.get("asigFamiPers")));
-
-        // Log para verificar los datos antes de la actualización
-        System.out.println("Datos a actualizar: " + persona);
-
-        // Intentar actualizar la persona en la base de datos
-        personaDAO.edit(persona);
-
-        // Responder con éxito
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(new JSONObject().put("message", "Registro actualizado exitosamente").toString());
-
-    }catch (IllegalArgumentException e) {
-        // Captura errores relacionados con parámetros inválidos
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.getWriter().write(new JSONObject().put("error", "Error en los parámetros: " + e.getMessage()).toString());
-        System.err.println("Error en los parámetros: " + e.getMessage());
     }
-        // Captura errores de formato de número, como los que pueden ocurrir con los IDs o valores numéricos
-         catch (Exception e) {
-        // Captura cualquier otro error inesperado
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        response.getWriter().write(new JSONObject().put("error", "Error al procesar la solicitud: " + e.getMessage()).toString());
-        System.err.println("Error inesperado: " + e.getMessage());
-        e.printStackTrace();  // Imprime el stack trace completo para depuración
-    }
-}
+
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

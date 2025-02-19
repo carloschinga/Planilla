@@ -139,5 +139,5 @@ public class VistaPersonaDetalleJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }
