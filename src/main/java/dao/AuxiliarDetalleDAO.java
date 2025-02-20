@@ -14,18 +14,19 @@ import javax.persistence.EntityManagerFactory;
  *
  * @author USER
  */
-public class AuxiliarDetalleDAO extends AuxiliarDetalleJpaController{
-    
+public class AuxiliarDetalleDAO extends AuxiliarDetalleJpaController {
+
     public AuxiliarDetalleDAO(EntityManagerFactory emf) {
         super(emf);
     }
-    
+
     public List<VistaAuxiliarDetallePersona> findAuxiliarByPeriodo(Integer auxiliarId) {
         EntityManager em = getEntityManager();
         try {
             return em.createQuery("SELECT v FROM VistaAuxiliarDetallePersona v WHERE v.codiAux = :auxiliar", VistaAuxiliarDetallePersona.class)
-                    .setParameter("auxiliar", auxiliarId) // Aquí auxiliarId es un Integer
+                    .setParameter("auxiliar", auxiliarId)
                     .getResultList();
+
         } finally {
             em.close();
         }

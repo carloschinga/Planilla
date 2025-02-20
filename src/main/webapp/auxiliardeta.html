@@ -3,7 +3,7 @@
         <div class="card-body">
             <div class="d-flex align-items-center">
                 <h1 class="h3 mb-0 text-gray-800">Registro de Auxiliares</h1>
-            </div>   
+            </div>
 
             <nav class="navbar navbar-light bg-white p-2">
                 <div class="container-fluid d-flex align-items-center p-0">
@@ -15,9 +15,13 @@
                             <select id="cmbPeriodo" class="form-select form-select-sm" style="width: auto;"></select>
                             <select id="cmbAuxiliar" class="form-select form-select-sm" style="width: auto;"></select>
                         </div>
-                        <button class="btn btn-primary" id="btnAddAux">
+                        <button class="btn btn-primary" id="btnImportar">
+                            <i class="fas fa-fw fa-upload"></i>
+                            <span>Importar Datos</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnPlantilla">
                             <i class="fas fa-fw fa-plus"></i>
-                            <span>Nuevo</span>
+                            <span>Plantilla</span>
                         </button>
                         <button class="btn btn-primary" id="btnPDF">
                             <i class="fas fa-fw fa-print"></i>
@@ -50,48 +54,9 @@
     </div>
 </div>
 
-<!-- Modal para Agregar/Editar AuxiliarDetalle -->
-<div class="modal fade" id="auxModal" tabindex="-1" aria-labelledby="auxModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form id="auxForm">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="auxModalLabel">Agregar Detalle</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+<!-- Input de archivo oculto -->
+<input type="file" id="fileInput" class="form-control mt-3" style="display:none;" />
 
-                <div class="modal-body">
-                    <input type="hidden" id="codiDetaAux" name="codiDetaAux">
-
-                    <div class="mb-4">
-                        <label for="codiAux" class="form-label d-block mb-4">Código Auxiliar</label>
-                        <input type="number" class="form-control" id="codiAux" name="codiAux" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="codiPers" class="form-label">Código Persona</label>
-                        <input type="number" class="form-control" id="codiPers" name="codiPers" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="descDeta" class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="descDeta" name="descDeta" required>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="montDeta" class="form-label">Monto</label>
-                        <input type="number" class="form-control" id="montDeta" name="montDeta" required>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 <script>
     $(document).ready(function () {
         $.getJSON("periodoservlet", function (data) {
@@ -127,6 +92,38 @@
                 alert("Error al cargar auxiliares");
             });
         }
+        $('#btnPlantilla').click(function () {
+            $.getJSON("personaservlet/personas/", function (data) {
+                // Crea una nueva hoja de cálculo de Excel (Book)
+                const wb = XLSX.utils.book_new();
+
+                // Crear un array con las columnas en el orden deseado: Código, Nombre, Monto, Descripción
+                const headers = ['Código', 'Nombre', 'Descripcion', 'Monto'];
+
+                // Convertir el JSON de las personas (u otros datos que se pasen) a una hoja de trabajo (sheet)
+                const wsData = [];
+
+                // Agregar los encabezados a la primera fila
+                wsData.push(headers);
+
+                // Agregar los datos (reemplazar con los datos que quieras exportar)
+                $.each(data, function (index, persona) {
+                    // Deja "Monto" y "Descripción" vacíos
+                    wsData.push([persona.Codigo, persona.Nombre, '', '']);  // Vacío para Monto y Descripción
+                });
+
+                // Crear una hoja con los datos
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // Añadir la hoja al libro de trabajo
+                XLSX.utils.book_append_sheet(wb, ws, 'Plantilla');
+
+                // Exportar el libro como un archivo de Excel llamado 'Plantilla.xlsx'
+                XLSX.writeFile(wb, 'Plantilla.xlsx');
+            }).fail(function () {
+                alert("Error al cargar los datos para la plantilla.");
+            });
+        });
 
 
 
@@ -134,9 +131,9 @@
         // Inicializar DataTable
         const auxTable = $('#auxTable').DataTable({
             ajax: {
-                url: 'auxiliardetalleservlet', // URL de tu servlet para detalles
+                url: 'auxiliardetalleservlet',
                 type: 'GET',
-                dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
+                dataSrc: '',
             },
             columns: [
                 {data: 'codiDetaAux'},
@@ -147,9 +144,7 @@
                 {
                     data: null,
                     render: function (data, type, row) {
-                        return `
-                            <button class="btn btn-primary btnEdit" data-id="${row.codiDetaAux}"><i class="fas fa-edit" ></i></button>
-                           `;
+                        return `<button class="btn btn-primary btnEdit" data-id="${row.codiDetaAux}"><i class="fas fa-edit"></i></button>`;
                     }
                 }
             ],
@@ -158,6 +153,7 @@
                 url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
+
 
         // Agregar o Editar AuxiliarDetalle
         $('#auxForm').submit(function (e) {
@@ -266,5 +262,56 @@
             var selectedAuxiliar = $(this).val(); // Obtener el valor del auxiliar seleccionado
             auxTable.ajax.url('auxiliardetalleservlet?auxiliar=' + selectedAuxiliar).load();
         });
+        $('#btnImportar').click(function () {
+            $('#fileInput').click(); // Abre el cuadro de selección de archivos
+        });
+
+// Cuando el usuario selecciona un archivo
+        $('#fileInput').change(function (e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function (event) {
+                    var data = event.target.result;
+
+                    // Usar la librería XLSX para leer el archivo Excel
+                    var workbook = XLSX.read(data, {type: 'binary'});
+
+                    // Suponiendo que el archivo tiene solo una hoja
+                    var sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                    // Convertir la hoja en un JSON
+                    var jsonData = XLSX.utils.sheet_to_json(sheet);
+
+                    // Crear un objeto FormData para enviar el archivo
+                    var formData = new FormData();
+                    formData.append('action', 'importar');  // Acción para el servidor (puedes modificar el nombre de este parámetro)
+                    formData.append('file', file);          // El archivo seleccionado
+
+                    // Enviar los datos al servidor para su procesamiento
+                    $.ajax({
+                        url: 'ImportarAuxiliarServlet', // URL del servlet de importación
+                        type: 'POST',
+                        data: formData,
+                        processData: false, // No procesar los datos
+                        contentType: false, // No establecer el tipo de contenido
+                        success: function (response) {
+                            alert('Datos importados correctamente');
+                            auxTable.ajax.reload();  // Recargar la tabla con los nuevos datos
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(xhr.responseText);  // Revisa la respuesta del servidor en la consola
+                            alert('Error al importar los datos');
+                        }
+                    });
+                };
+
+                // Leer el archivo como binario
+                reader.readAsBinaryString(file);
+            }
+        });
+
+
     });
 </script>

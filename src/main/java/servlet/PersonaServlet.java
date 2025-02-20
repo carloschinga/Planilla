@@ -30,7 +30,7 @@ import org.json.JSONObject;
  *
  * @author USER
  */
-@WebServlet(name = "PersonaServlet", urlPatterns = {"/personaservlet/*"})
+@WebServlet(name = "PersonaServlet", urlPatterns = {"/personaservlet/*", "/personaservlet/personas"})
 public class PersonaServlet extends HttpServlet {
 
     private final PersonaDAO personaDAO;
@@ -49,10 +49,11 @@ public class PersonaServlet extends HttpServlet {
         response.setContentType("application/json");
         String pathInfo = request.getPathInfo();
 
-        emf.getCache().evict(VistaPersonaDetalleDAO.class);
+        emf.getCache().evict(VistaPersonaDetalleDAO.class);  // Evitar cache si es necesario
+
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // Obtener todos los registros de personas
+                // Obtener todos los registros de personas con todos los campos
                 List<VistaPersonaDetalle> personaList = vistaPersonaDetalleDAO.findVistaPersonaDetalleEntities();
                 JSONArray jsonArray = new JSONArray();
                 for (VistaPersonaDetalle persona : personaList) {
@@ -60,7 +61,7 @@ public class PersonaServlet extends HttpServlet {
                     jsonObject.put("codiPers", persona.getCodiPers());
                     jsonObject.put("numeDocu", persona.getNumeDocu());
                     jsonObject.put("nombPers", persona.getNombPers());
-                    jsonObject.put("snpPers", Boolean.valueOf(persona.getSnpPers())); // Nueva columna agregada
+                    jsonObject.put("snpPers", Boolean.valueOf(persona.getSnpPers()));
                     jsonObject.put("codiAFP", persona.getCodiAFP());
                     jsonObject.put("nombAFP", persona.getNombAFP());
                     jsonObject.put("codiPlant", persona.getCodiPlant());
@@ -71,16 +72,39 @@ public class PersonaServlet extends HttpServlet {
                     jsonArray.put(jsonObject);
                 }
                 response.getWriter().write(jsonArray.toString());
+            } else if (pathInfo.equals("/personas/")) {
+                // Obtener solo los campos 'codiPers' y 'nombPers'
+                List<VistaPersonaDetalle> personaList = vistaPersonaDetalleDAO.findVistaPersonaDetalleEntities();
+                JSONArray jsonArray = new JSONArray();
+                for (VistaPersonaDetalle persona : personaList) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("Codigo", persona.getCodiPers());
+                    jsonObject.put("Nombre", persona.getNombPers());
+                   
+
+                    jsonObject.put("Descripcion", "");  // Campo sin datos
+                    jsonObject.put("Monto", "");  // Campo sin datos
+
+                    // Asegurarse de que el JSON esté en el orden correcto
+                    JSONObject orderedJsonObject = new JSONObject();
+                    orderedJsonObject.put("Codigo", jsonObject.get("Codigo"));
+                    orderedJsonObject.put("Nombre", jsonObject.get("Nombre"));
+                    orderedJsonObject.put("Descripcion", jsonObject.get("Descripcion"));
+                    orderedJsonObject.put("Monto", jsonObject.get("Monto"));
+                    
+                     jsonArray.put(jsonObject);
+                }
+                response.getWriter().write(jsonArray.toString());
             } else {
                 // Obtener un registro de persona por ID
-                int id = Integer.parseInt(pathInfo.substring(1));
+                int id = Integer.parseInt(pathInfo.substring(1));  // extrae el ID
                 Persona persona = personaDAO.findPersona(id);
                 if (persona != null) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("codiPers", persona.getCodiPers());
                     jsonObject.put("numeDocu", persona.getNumeDocu());
                     jsonObject.put("nombPers", persona.getNombPers());
-                    jsonObject.put("snpPers", persona.getSnpPers()); // Nueva columna agregada
+                    jsonObject.put("snpPers", persona.getSnpPers());
                     jsonObject.put("codiAFP", persona.getCodiAFP());
                     jsonObject.put("codiPlant", persona.getCodiPlant());
                     jsonObject.put("actiPers", persona.getActiPers());
