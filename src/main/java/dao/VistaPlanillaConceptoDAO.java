@@ -39,7 +39,7 @@ public class VistaPlanillaConceptoDAO extends VistaPlanillaConceptoJpaController
     public List<VistaPlanillaConcepto> findPlanillaConceptosByPeriodoAndPersona(Integer periodoId,Integer personaId) {
         EntityManager em = getEntityManager();
         try {
-            return em.createQuery("SELECT v FROM VistaPlanillaConcepto v WHERE v.codiPeri = :codiPeri and v.codiPers = :codiPers", VistaPlanillaConcepto.class)
+            return em.createQuery("SELECT v FROM VistaPlanillaConcepto v WHERE v.codiPeri = :codiPeri and v.codiPers = :codiPers and v.actvDeta=true", VistaPlanillaConcepto.class)
                     .setParameter("codiPeri", periodoId) // Aquí plantillaId es un Integer
                     .setParameter("codiPers", personaId)
                     .getResultList();

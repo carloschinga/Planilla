@@ -77,6 +77,12 @@ public class PlanillaConceptoDAO extends PlanillaConceptoJpaController {
             Query query = em.createNativeQuery(sql);
 
             int rowsUpdated = query.executeUpdate();
+            
+            sql = "UPDATE Planilla SET actiPlani = 0 WHERE codiPlani IN " + codigosPlanilla + "";
+            query = em.createNativeQuery(sql);
+
+            rowsUpdated = query.executeUpdate();
+            
             em.getTransaction().commit();
             return rowsUpdated;
         } catch (Exception ex) {

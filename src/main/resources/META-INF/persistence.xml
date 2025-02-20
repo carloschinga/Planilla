@@ -3,7 +3,6 @@
   <persistence-unit name="com.mycompany_Planilla_war_1.0-SNAPSHOTPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>dto.Planilla</class>
-    <class>dto.Plantilla</class>
     <class>dto.Concepto</class>
     <class>dto.Persona</class>
     <class>dto.Periodo</class>
@@ -19,6 +18,7 @@
     <class>dto.Usuario</class>
     <class>dto.VistaPersonaDetalle</class>
     <class>dto.Afp</class>
+    <class>dto.Plantilla</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\DESKTOP-00B730Q:1433;databaseName=Planilla;trustServerCertificate =true"/>

@@ -7,6 +7,7 @@ package servlet;
 import dao.AuxiliarDAO;
 import dto.Auxiliar;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ import org.json.JSONObject;
  *
  * @author USER
  */
-
 @WebServlet(name = "AuxiliarServlet", urlPatterns = {"/auxiliarservlet/*"})
 public class AuxiliarServlet extends HttpServlet {
 
@@ -43,28 +43,28 @@ public class AuxiliarServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
-        String pathInfo = request.getPathInfo();
+        response.setCharacterEncoding("UTF-8");
 
-         // Obtener el parámetro 'periodo'
+        String pathInfo = request.getPathInfo();
         String periodoParam = request.getParameter("periodo");
         int periodoId = 1; // Valor predeterminado
-        
-        try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                
-                if (periodoParam != null && !periodoParam.isEmpty()) {
-                    try {
-                        periodoId = Integer.parseInt(periodoParam); // Convertir a entero
-                    } catch (NumberFormatException e) {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        response.getWriter().write("{\"error\":\"El parámetro 'periodo' debe ser un número entero válido\"}");
-                        return;
-                    }
+
+        try (PrintWriter out = response.getWriter()) {
+            if (periodoParam != null && !periodoParam.isEmpty()) {
+                try {
+                    periodoId = Integer.parseInt(periodoParam); // Convertir a entero
+                } catch (NumberFormatException e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.write("{\"error\":\"El parámetro 'periodo' debe ser un número entero válido\"}");
+                    return;
                 }
-                
-                // Obtener todos los registros
+            }
+
+            if (pathInfo == null || pathInfo.equals("/")) {
+                // Obtener todos los registros filtrados por periodo
                 List<Auxiliar> auxiliarList = auxiliarDAO.findAuxiliarByPeriodo(periodoId);
                 JSONArray jsonArray = new JSONArray();
+
                 for (Auxiliar auxiliar : auxiliarList) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("codiAux", auxiliar.getCodiAux());
@@ -73,10 +73,22 @@ public class AuxiliarServlet extends HttpServlet {
                     jsonObject.put("actvAux", auxiliar.getActvAux());
                     jsonArray.put(jsonObject);
                 }
-                response.getWriter().write(jsonArray.toString());
+
+                out.write(jsonArray.toString());
             } else {
+                // Validar que el path contiene un ID numérico
+                String idStr = pathInfo.substring(1);
+                int id;
+
+                try {
+                    id = Integer.parseInt(idStr);
+                } catch (NumberFormatException e) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.write("{\"error\":\"El ID proporcionado no es válido\"}");
+                    return;
+                }
+
                 // Obtener un registro por ID
-                int id = Integer.parseInt(pathInfo.substring(1));
                 Auxiliar auxiliar = auxiliarDAO.findAuxiliar(id);
                 if (auxiliar != null) {
                     JSONObject jsonObject = new JSONObject();
@@ -84,9 +96,10 @@ public class AuxiliarServlet extends HttpServlet {
                     jsonObject.put("nombAux", auxiliar.getNombAux());
                     jsonObject.put("codiPeri", auxiliar.getCodiPeri());
                     jsonObject.put("actvAux", auxiliar.getActvAux());
-                    response.getWriter().write(jsonObject.toString());
+                    out.write(jsonObject.toString());
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    out.write("{\"error\":\"No se encontró el auxiliar con el ID especificado\"}");
                 }
             }
         } catch (Exception e) {

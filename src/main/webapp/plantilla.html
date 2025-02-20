@@ -1,40 +1,36 @@
-
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
-            <div class="position-relative d-flex align-items-center">
-                <h1 class="h3 mb-0 text-gray-800">Gestión de Plantillas</h1>
+            <div class="d-flex align-items-center mb-3">
+                <h1 class="h3 text-gray-800">Gestión de Plantillas</h1>
             </div>   
             <nav class="navbar navbar-light bg-white p-2">
-                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
-                    <!-- Selector de Periodo -->
+                <div class="container-fluid d-flex align-items-center px-0">
+                    <!-- Selector de Periodo (opcional) -->
                     <div class="d-flex align-items-center me-3">
-
+                        <!-- Contenido para selector de periodo -->
                     </div>
-
                     <!-- Grupo de Botones -->
                     <div class="btn-group"> 
                         <button class="btn btn-primary" id="btnAddPlantilla">
-                            <i class="fas fa-fw fa-plus"></i>
-                            <span>Nuevo</span>
+                            <i class="fas fa-fw fa-plus"></i> Nuevo
                         </button>
                         <button class="btn btn-primary" id="btnPDF">
-                            <i class="fas fa-fw fa-print"></i>
-                            <span>Imprimir</span>
+                            <i class="fas fa-fw fa-print"></i> Imprimir
                         </button>
                         <button class="btn btn-primary" id="btnExportar">
-                            <i class="fas fa-fw fa-file-excel"></i>
-                            <span>Exportar</span>
+                            <i class="fas fa-fw fa-file-excel"></i> Exportar
                         </button>
                     </div>
                 </div>
             </nav>
             <hr/>
-            <table id="plantillaTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="plantillaTable" class="table table-striped table-bordered w-100">
                 <thead>
                     <tr>
-                        <th>Código</th>
+                      
                         <th>Nombre</th>
+                        <th>Activo</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -55,51 +51,68 @@
                     <h5 class="modal-title" id="plantillaModalLabel">Agregar Plantilla</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-
                 <div class="modal-body">
                     <input type="hidden" id="codiPlant" name="codiPlant">
                     <div class="mb-3">
                         <label for="nombPlant" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="nombPlant" name="nombPlant" maxlength="50" required>
                     </div>
+                    <div class="mb-3">
+                        <label for="actvPlant" class="form-label">Activo</label>
+                        <select class="form-select" id="actvPlant" name="actvPlant" required>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-fw fa-undo"></i>Cancelar</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-fw fa-save"></i>Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-fw fa-undo"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-fw fa-save"></i> Guardar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function () {
         // Inicializar DataTable
         const plantillaTable = $('#plantillaTable').DataTable({
             ajax: {
-                url: 'plantillaservlet', // URL de tu servlet
+                url: 'plantillaservlet',
                 type: 'GET',
-                dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
+                dataSrc: '' // Respuesta en formato array
             },
             columns: [
-                {data: 'codiPlant'},
+                
                 {data: 'nombPlant'},
                 {
-                    data: null,
-                    render: function (data, type, row) {
-                        return `
-                            <button class="btn btn-primary btnEdit" data-id="${row.codiPlant}"><i class="fas fa-edit" ></i></button>
-                        `;
+                    data: 'actvPlant',
+                    render: function (data) {
+                        return data ? 'Sí' : 'No';
                     }
+                },
+                {
+                    data: null,
+                    render: (data, type, row) => `
+                    <button class="btn btn-primary btnEdit" data-id="${row.codiPlant}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                `
                 }
             ],
-             pageLength: 100,
+            pageLength: 100,
             language: {
-               url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
+                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
 
         // Agregar o Editar Plantilla
-        $('#plantillaForm').submit(function (e) {
+        $('#plantillaForm').on('submit', function (e) {
             e.preventDefault();
             const formData = $(this).serialize();
             const id = $('#codiPlant').val();
@@ -113,6 +126,9 @@
                 success: function () {
                     $('#plantillaModal').modal('hide');
                     plantillaTable.ajax.reload();
+                },
+                error: function (xhr) {
+                    alert('Ocurrió un error: ' + xhr.responseJSON.error);
                 }
             });
         });
@@ -123,131 +139,105 @@
             $.get(`plantillaservlet/${id}`, function (data) {
                 $('#codiPlant').val(data.codiPlant);
                 $('#nombPlant').val(data.nombPlant);
+                // Establecer el valor del select en función del booleano actvPlant
+                $('#actvPlant').val(data.actvPlant ? "true" : "false");
                 $('#plantillaModalLabel').text('Editar Plantilla');
                 $('#plantillaModal').modal('show');
+            }).fail(function (xhr) {
+                alert('Error al obtener el registro: ' + xhr.responseJSON.error);
             });
         });
 
         // Limpiar modal al abrir para agregar
-        $('#btnAddPlantilla').click(function () {
+        $('#btnAddPlantilla').on('click', function () {
             $('#plantillaForm')[0].reset();
             $('#plantillaModalLabel').text('Agregar Plantilla');
             $('#plantillaModal').modal('show');
         });
 
+        // Buscar en DataTable
         $('#txtBuscar').on('input', function () {
             plantillaTable.search(this.value).draw();
         });
 
-        $('#btnPDF').click(function () {
+        // Imprimir PDF
+        $('#btnPDF').on('click', function () {
             const {jsPDF} = window.jspdf;
             const doc = new jsPDF();
-
-            // Obtener la fecha y hora actual
             const fechaActual = new Date();
-            const fecha = fechaActual.toLocaleDateString(); // Fecha en formato local
-            const hora = fechaActual.toLocaleTimeString(); // Hora en formato local
-            const fechaHora = `${fecha} ${hora}`;
-
-            // Configuración del nombre del sistema
+            const fechaHora = `${fechaActual.toLocaleDateString()} ${fechaActual.toLocaleTimeString()}`;
             const nombreSistema = 'Software de Planilla';
-
-            // Tamaño de página
             const pageWidth = doc.internal.pageSize.getWidth();
 
-            // Agregar fecha y hora (esquina izquierda)
             doc.setFontSize(8);
-            doc.text(fechaHora, 10, 10); // Posición (X: izquierda, Y: superior)
-
-            // Agregar nombre del sistema (esquina derecha)
+            doc.text(fechaHora, 10, 10);
             const textWidthSistema = doc.getTextWidth(nombreSistema);
-            doc.text(nombreSistema, pageWidth - textWidthSistema - 10, 10); // Posición (X: derecha, Y: superior)
+            doc.text(nombreSistema, pageWidth - textWidthSistema - 10, 10);
 
-            // Configuración del título centrado
             const titulo = 'LISTADO DE PLANTILLAS';
             const textWidthTitulo = doc.getTextWidth(titulo);
-            const textX = (pageWidth - textWidthTitulo) / 2;
-            doc.setFontSize(12); // Tamaño de fuente más grande para el título
-            doc.text(titulo, textX, 20);
+            doc.setFontSize(12);
+            doc.text(titulo, (pageWidth - textWidthTitulo) / 2, 20);
 
-            // Obtener encabezados de la tabla
+            // Encabezados (omitimos última columna de acciones)
             const headers = [];
-
             $('#plantillaTable thead th').each(function (i, header) {
-                // Ignorar el último encabezado
                 if (i < $('#plantillaTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
             });
 
-
-            // Obtener filas de la tabla
+            // Filas (omitimos última columna)
             const rows = [];
             $('#plantillaTable tbody tr').each(function () {
                 const row = [];
-                $(this).find('td').each(function (index) {
-                    // Omite la última columna
-                    if (index < $(this).parent().find('td').length - 1) {
-                        row.push($(this).text());
+                $(this).find('td').each(function (i, cell) {
+                    if (i < $(this).parent().find('td').length - 1) {
+                        row.push($(cell).text());
                     }
                 });
                 rows.push(row);
             });
 
-
-
-
-            // Generar la tabla en el PDF
             doc.autoTable({
                 head: [headers],
                 body: rows,
-                startY: 30, // Comienza después del título
+                startY: 30
             });
 
-            // Descargar el PDF
             doc.save('plantillas.pdf');
         });
 
-
-        $('#btnExportar').click(function () {
-            // Crear un array para almacenar los datos de la tabla
-            var tableData = [];
-
-            // Agregar los encabezados de la tabla como la primera fila
-            var headers = [];
+        // Exportar a Excel
+        $('#btnExportar').on('click', function () {
+            let tableData = [];
+            let headers = [];
             $('#plantillaTable thead th').each(function (i, header) {
-                // Ignorar el último encabezado
                 if (i < $('#plantillaTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
             });
             tableData.push(headers);
 
-            // Agregar las filas de datos de la tabla
             $('#plantillaTable tbody tr').each(function () {
-                var rowData = [];
+                let rowData = [];
                 $(this).find('td').each(function (i, cell) {
-                    // Ignorar la última columna
                     if (i < $(this).parent().find('td').length - 1) {
                         rowData.push($(cell).text());
                     }
                 });
                 tableData.push(rowData);
             });
-            // Crear una hoja de trabajo de Excel a partir del array de datos
-            var ws = XLSX.utils.aoa_to_sheet(tableData);
 
-            // Crear un libro de trabajo (workbook)
-            var wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(tableData);
+            const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Plantillas');
-
-            // Guardar el archivo Excel
             XLSX.writeFile(wb, 'plantillas.xlsx');
         });
-        $(document).ready(function () {
-            $('#plantillaModal .btn-close, #plantillaModal .btn-secondary').click(function () {
-                $('#plantillaModal').modal('hide');
-            });
+
+        // Cerrar modal al hacer clic en botones de cierre
+        $('#plantillaModal').on('click', '.btn-close, .btn-secondary', function () {
+            $('#plantillaModal').modal('hide');
         });
     });
 </script>

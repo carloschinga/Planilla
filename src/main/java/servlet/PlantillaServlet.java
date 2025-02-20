@@ -3,6 +3,7 @@ package servlet;
 import dao.PlantillaDAO;
 import dto.Plantilla;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ public class PlantillaServlet extends HttpServlet {
     private final EntityManagerFactory emf;
 
     public PlantillaServlet() {
-        // Initialize EntityManagerFactory and PlantillaDAO
         this.emf = Persistence.createEntityManagerFactory("com.mycompany_Planilla_war_1.0-SNAPSHOTPU");
         this.plantillaDAO = new PlantillaDAO(emf);
     }
@@ -41,34 +41,56 @@ public class PlantillaServlet extends HttpServlet {
         response.setContentType("application/json");
         String pathInfo = request.getPathInfo();
 
-        try {
+        try (PrintWriter out = response.getWriter()) {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // Get all records
+                // Obtener todos los registros
                 List<Plantilla> plantillaList = plantillaDAO.findPlantillaEntities();
                 JSONArray jsonArray = new JSONArray();
                 for (Plantilla plantilla : plantillaList) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("codiPlant", plantilla.getCodiPlant());
                     jsonObject.put("nombPlant", plantilla.getNombPlant());
+                    jsonObject.put("actvPlant", plantilla.getActvPlant());
                     jsonArray.put(jsonObject);
                 }
-                response.getWriter().write(jsonArray.toString());
-            } else {
-                // Get record by ID
-                int id = Integer.parseInt(pathInfo.substring(1));
-                Plantilla plantilla = plantillaDAO.findPlantilla(id);
-                if (plantilla != null) {
+                out.write(jsonArray.toString());
+            } else if (pathInfo.equals("/activos")) {
+                List<Plantilla> plantillaList = plantillaDAO.listarActivos();
+                JSONArray jsonArray = new JSONArray();
+                for (Plantilla plantilla : plantillaList) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("codiPlant", plantilla.getCodiPlant());
                     jsonObject.put("nombPlant", plantilla.getNombPlant());
-                    response.getWriter().write(jsonObject.toString());
-                } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    jsonObject.put("actvPlant", plantilla.getActvPlant());
+                    jsonArray.put(jsonObject);
+                }
+                out.write(jsonArray.toString());
+            }
+            else
+            {
+               
+                try {
+                    int id = Integer.parseInt(pathInfo.substring(1));
+                    Plantilla plantilla = plantillaDAO.findPlantilla(id);
+                    if (plantilla != null) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("codiPlant", plantilla.getCodiPlant());
+                        jsonObject.put("nombPlant", plantilla.getNombPlant());
+                        jsonObject.put("actvPlant", plantilla.getActvPlant());
+                        out.write(jsonObject.toString());
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        out.write(new JSONObject().put("error", "Registro no encontrado").toString());
+                    }
+                } catch (NumberFormatException nfe) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.write(new JSONObject().put("error", "Formato de ID no válido").toString());
                 }
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().put("error", "Error al obtener los datos: " + e.getMessage()).toString());
+            response.getWriter().write(new JSONObject()
+                    .put("error", "Error al obtener los datos: " + e.getMessage()).toString());
         }
     }
 
@@ -78,29 +100,23 @@ public class PlantillaServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        try {
-            // Parse form-encoded parameters
+        try (PrintWriter out = response.getWriter()) {
             String nombPlant = request.getParameter("nombPlant");
-
-            // Validate required fields
-            if (nombPlant == null) {
+            // Se podría agregar validación adicional según las reglas de negocio
+            if (nombPlant == null || nombPlant.trim().isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(new JSONObject()
-                        .put("error", "Missing required fields").toString());
+                out.write(new JSONObject().put("error", "El campo nombPlant es obligatorio").toString());
                 return;
             }
 
-            // Map to Plantilla object
             Plantilla plantilla = new Plantilla();
             plantilla.setNombPlant(nombPlant);
+            // Opcional: establecer actvPlant si se recibe o un valor por defecto
+            plantilla.setActvPlant(Boolean.TRUE);
 
-            // Persist the Plantilla object
             plantillaDAO.create(plantilla);
-
-            // Respond with success
             response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write(new JSONObject()
-                    .put("message", "Registro creado exitosamente").toString());
+            out.write(new JSONObject().put("message", "Registro creado exitosamente").toString());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(new JSONObject()
@@ -113,35 +129,54 @@ public class PlantillaServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/json");
 
-        try {
-            // Parse the request body as application/x-www-form-urlencoded
+        try (PrintWriter out = response.getWriter()) {
+            // Parsear el cuerpo de la solicitud (application/x-www-form-urlencoded)
             Map<String, String> parameters = new HashMap<>();
             String body = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             String[] pairs = body.split("&");
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=");
-                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
-                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
-                parameters.put(key, value);
+                if (keyValue.length == 2) {
+                    String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
+                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
+                    parameters.put(key, value);
+                }
             }
 
-            // Extract values from the parsed parameters
+            if (!parameters.containsKey("codiPlant")) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.write(new JSONObject().put("error", "El campo codiPlant es obligatorio").toString());
+                return;
+            }
             int codiPlant = Integer.parseInt(parameters.get("codiPlant"));
             String nombPlant = parameters.get("nombPlant");
+            String actvPlantStr = parameters.get("actvPlant");
+            Boolean actvPlant = actvPlantStr != null ? Boolean.valueOf(actvPlantStr) : null;
 
-            // Update Plantilla object
-            Plantilla plantilla = new Plantilla();
-            plantilla.setCodiPlant(codiPlant);
-            plantilla.setNombPlant(nombPlant);
+            Plantilla plantilla = plantillaDAO.findPlantilla(codiPlant);
+            if (plantilla == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                out.write(new JSONObject().put("error", "Registro no encontrado").toString());
+                return;
+            }
 
-            // Persist changes
+            // Actualizar campos
+            if (nombPlant != null) {
+                plantilla.setNombPlant(nombPlant);
+            }
+            if (actvPlant != null) {
+                plantilla.setActvPlant(actvPlant);
+            }
+
             plantillaDAO.edit(plantilla);
-
-            // Respond with success
-            response.getWriter().write(new JSONObject().put("message", "Registro actualizado exitosamente").toString());
+            out.write(new JSONObject().put("message", "Registro actualizado exitosamente").toString());
+        } catch (NumberFormatException nfe) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(new JSONObject().put("error", "Formato de ID no válido").toString());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().put("error", "Error al actualizar el registro: " + e.getMessage()).toString());
+            response.getWriter().write(new JSONObject()
+                    .put("error", "Error al actualizar el registro: " + e.getMessage()).toString());
         }
     }
 
@@ -151,18 +186,24 @@ public class PlantillaServlet extends HttpServlet {
         response.setContentType("application/json");
 
         String pathInfo = request.getPathInfo();
-        try {
+        try (PrintWriter out = response.getWriter()) {
             if (pathInfo != null && pathInfo.length() > 1) {
-                int id = Integer.parseInt(pathInfo.substring(1));
-                plantillaDAO.destroy(id);
-                response.getWriter().write(new JSONObject().put("message", "Registro eliminado exitosamente").toString());
+                try {
+                    int id = Integer.parseInt(pathInfo.substring(1));
+                    plantillaDAO.destroy(id);
+                    out.write(new JSONObject().put("message", "Registro eliminado exitosamente").toString());
+                } catch (NumberFormatException nfe) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.write(new JSONObject().put("error", "Formato de ID no válido").toString());
+                }
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(new JSONObject().put("error", "ID de registro no válido").toString());
+                out.write(new JSONObject().put("error", "ID de registro no válido").toString());
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new JSONObject().put("error", "Error al eliminar el registro: " + e.getMessage()).toString());
+            response.getWriter().write(new JSONObject()
+                    .put("error", "Error al eliminar el registro: " + e.getMessage()).toString());
         }
     }
 }

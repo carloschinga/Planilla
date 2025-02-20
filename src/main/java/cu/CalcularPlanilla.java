@@ -85,11 +85,12 @@ public class CalcularPlanilla {
                 // Reemplazo de variables en la fórmula
                 VistaPersonaDetalle persona = buscarPorCodiPers(listaPersona, concepto.getCodiPers());
                 formula = formula
-                        .replace("BPERSONA(sueldo)", persona.getSuelPers().toString())
-                        .replace("BPERSONA(asig_fami)", persona.getAsigFamiPers().toString())
-                        .replace("BPERSONA(segu_afp)", persona.getSeguAFP().toString())
-                        .replace("BPERSONA(comi_afp)", persona.getComiAFP().toString())
-                        .replace("BPERSONA(mont_afp)", persona.getMontAFP().toString());
+                        .replace("BPERSONA(Sueldo)", persona.getSuelPers().toString())
+                        .replace("BPERSONA(Num.Hijos)", persona.getAsigFamiPers().toString())
+                        .replace("BPERSONA(SNP)", persona.getSnpPers() ? "1" : "0")
+                        .replace("BPERSONA(Seguro)", (persona.getSeguAFP()!=null) ? persona.getSeguAFP().toString() : "0")
+                        .replace("BPERSONA(Comision)", (persona.getComiAFP()!=null) ? persona.getComiAFP().toString(): "0")
+                        .replace("BPERSONA(Monto)", (persona.getMontAFP()!=null)? persona.getMontAFP().toString() : "0");
 
                 if (formula.startsWith("BAUXILIAR")) {
                     String contenido;

@@ -48,14 +48,14 @@ public class GenerarPlanillaServlet extends HttpServlet {
                     jsonString = generarPlanilla.anularPlanillaGenerada(1, resultado.getString("codigos"));
                     resultado = new JSONObject(jsonString);
                     if (resultado.getString("resultado").equals("ok")) {
-                        jsonString = generarPlanilla.generar();
+                        jsonString = generarPlanilla.generar(codiPeri);
                         resultado = new JSONObject(jsonString);
                     }
                 } else {
                     System.out.println("Se cancelo la operacion");
                 }
             } else {
-                jsonString = generarPlanilla.generar();
+                jsonString = generarPlanilla.generar(codiPeri);
                 resultado = new JSONObject(jsonString);
             }
             System.out.println(resultado);

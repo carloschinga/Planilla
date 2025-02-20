@@ -39,7 +39,7 @@
             <table id="auxTable" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
-                        <th>Código</th>
+
                         <th>Nombre</th>
                         <!--<th>Código Período</th>-->
                         <th>Activo</th>
@@ -94,7 +94,8 @@
 </div>
 <script>
     $(document).ready(function () {
-        $.getJSON("periodoservlet", function (data) {
+        let auxTable;
+        $.getJSON("periodoservlet/activos", function (data) {
             var select = $('#cmbPeriodo');
 
             // Limpiar las opciones existentes
@@ -104,46 +105,56 @@
             $.each(data, function (index, periodo) {
                 select.append('<option value="' + periodo.codiPeri + '">' + periodo.nombPeri + '</option>');
             });
-            
-             $('#codiPeri').val($('#cmbPeriodo').val());
+
+            $('#codiPeri').val($('#cmbPeriodo').val());
+          
+            initAuxTable($('#cmbPeriodo').val());
         }).fail(function () {
             alert("error");
             //$('#plantilla-container').html('<p>Error al cargar las plantillas.</p>');
         });
         // Inicializar DataTable
-        const auxTable = $('#auxTable').DataTable({
-            ajax: {
-                url: 'auxiliarservlet', // URL de tu servlet
-                type: 'GET',
-                dataSrc: '' // Aquí debes dejarlo vacío para que DataTables asuma que la respuesta es un array directo
-            },
-            columns: [
-                {data: 'codiAux'},
-                {data: 'nombAux'},
-                //{data: 'codiPeri'},
-
-                {data: 'actvAux', render: function (data) {
-                        return data ? 'Sí' : 'No';
-                    }},
-                {
-                    data: null,
-                    render: function (data, type, row) {
-                        return `
-                            <button class="btn btn-primary btnEdit" data-id="${row.codiAux}"><i class="fas fa-edit" ></i></button>
-                           `;
+        function initAuxTable(valor) {
+            auxTable= $('#auxTable').DataTable({
+                ajax: {
+                    url: 'auxiliarservlet', // URL de tu servlet
+                    type: 'GET',
+                    dataSrc: '', // DataTables asume que la respuesta es un array directo
+                    data: function (d) {
+                        // Agrega el parámetro 'periodo'
+                        d.periodo = valor; // Puedes cambiar la forma de obtener el valor, aquí se toma desde un input con id="periodo"
                     }
+                },
+                columns: [
+                    {data: 'nombAux'},
+                    {
+                        data: 'actvAux',
+                        render: function (data) {
+                            return data ? 'Sí' : 'No';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return `
+                        <button class="btn btn-primary btnEdit" data-id="${row.codiAux}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    `;
+                        }
+                    }
+                ],
+                pageLength: 100,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
                 }
-            ],
-            pageLength: 100,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
-            }
-        });
+            });
+        }
 
         // Agregar o Editar Auxiliar
         $('#auxForm').submit(function (e) {
             e.preventDefault();
-            const formData = $(this).serialize();            
+            const formData = $(this).serialize();
             const id = $('#codiAux').val();
             const url = id ? `auxiliarservlet/${id}` : 'auxiliarservlet';
             const method = id ? 'PUT' : 'POST';

@@ -15,6 +15,7 @@ import dto.Persona;
 import dto.Planilla;
 import dto.PlanillaConcepto;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -43,16 +44,16 @@ public class GenerarPlanilla {
         this.planillaConceptoDAO = new PlanillaConceptoDAO(emf);
     }
 
-    public String generar() {
+    public String generar(String codiPeri) {
         JSONObject resultado = new JSONObject();
         int codiPlantTmp = 0;
 
         // Obtener el periodo actual
-        Periodo periodoActual = periodoDAO.findByActiPeri();
+        /*Periodo periodoActual = periodoDAO.findByActiPeri();
         if (periodoActual == null) {
             System.out.println("No se encontró un periodo activo.");
             return resultado.put("resultado", "error").put("mensaje", "No se encontró un periodo activo.").toString();
-        }
+        }*/
 
         // Obtener la lista de trabajadores activos
         List<Persona> listaPersona = personaDAO.listarActivos();
@@ -79,7 +80,7 @@ public class GenerarPlanilla {
                 }
                 //verificar si existe planilla del periodoActual
 
-                Planilla planilla = new Planilla(0, periodoActual.getCodiPeri(), persona.getCodiPers(), true);
+                Planilla planilla = new Planilla(0, Integer.parseInt(codiPeri), persona.getCodiPers(), true);
                 planillaDAO.create(planilla);
 
                 for (Concepto concepto : listaConcepto) {
@@ -131,34 +132,33 @@ public class GenerarPlanilla {
 
     public static String obtenerCodiPlaniListFormat(List<Planilla> planillas) {
         
-        /*String result = planillas.stream()
+        String result = planillas.stream()
                 .map(planilla -> planilla.getCodiPlani().toString())
                 .collect(Collectors.joining(", ", "(", ")"));
-        return result;*/
-        return "";
+        return result;
     } 
 
     public static void main(String[] args) {
-        JSONObject resultado = null;
-        GenerarPlanilla generarPlanilla = new GenerarPlanilla();
-        String jsonString = generarPlanilla.existePlanillaGeneradaXPeriodo(1);
-        resultado = new JSONObject(jsonString);
-        if (resultado.getString("resultado").equals("si")) {
-            if (JOptionPane.YES_OPTION == JOptionPane.showInternalConfirmDialog(null, "Ya existe, desea anular el existente y volver a generar")) {
-                jsonString = generarPlanilla.anularPlanillaGenerada(1, resultado.getString("codigos"));
-                resultado = new JSONObject(jsonString);
-                if (resultado.getString("resultado").equals("ok")) {
-                    jsonString = generarPlanilla.generar();
-                    resultado = new JSONObject(jsonString);
-                }
-            }else{
-                 System.out.println("Se cancelo la operacion");
-            }
-        } else {
-            jsonString = generarPlanilla.generar();
-            resultado = new JSONObject(jsonString);
-        }
-        System.out.println(resultado);
+//        JSONObject resultado = null;
+//        GenerarPlanilla generarPlanilla = new GenerarPlanilla();
+//        String jsonString = generarPlanilla.existePlanillaGeneradaXPeriodo(1);
+//        resultado = new JSONObject(jsonString);
+//        if (resultado.getString("resultado").equals("si")) {
+//            if (JOptionPane.YES_OPTION == JOptionPane.showInternalConfirmDialog(null, "Ya existe, desea anular el existente y volver a generar")) {
+//                jsonString = generarPlanilla.anularPlanillaGenerada(1, resultado.getString("codigos"));
+//                resultado = new JSONObject(jsonString);
+//                if (resultado.getString("resultado").equals("ok")) {
+//                    jsonString = generarPlanilla.generar();
+//                    resultado = new JSONObject(jsonString);
+//                }
+//            }else{
+//                 System.out.println("Se cancelo la operacion");
+//            }
+//        } else {
+//            jsonString = generarPlanilla.generar();
+//            resultado = new JSONObject(jsonString);
+//        }
+//        System.out.println(resultado);
         //generarPlanilla.generar();
 
     }

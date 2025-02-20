@@ -15,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -22,9 +23,11 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "Periodo")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Periodo.findAll", query = "SELECT p FROM Periodo p"),
     @NamedQuery(name = "Periodo.findByNombPeri", query = "SELECT p FROM Periodo p WHERE p.nombPeri = :nombPeri"),
+    @NamedQuery(name = "Periodo.findBySelePeri", query = "SELECT p FROM Periodo p WHERE p.selePeri = :selePeri"),
     @NamedQuery(name = "Periodo.findByActiPeri", query = "SELECT p FROM Periodo p WHERE p.actiPeri = :actiPeri"),
     @NamedQuery(name = "Periodo.findByCodiPeri", query = "SELECT p FROM Periodo p WHERE p.codiPeri = :codiPeri")})
 public class Periodo implements Serializable {
@@ -33,6 +36,8 @@ public class Periodo implements Serializable {
     @Size(max = 150)
     @Column(name = "nombPeri")
     private String nombPeri;
+    @Column(name = "selePeri")
+    private Boolean selePeri;
     @Column(name = "actiPeri")
     private Boolean actiPeri;
     @Id
@@ -54,6 +59,14 @@ public class Periodo implements Serializable {
 
     public void setNombPeri(String nombPeri) {
         this.nombPeri = nombPeri;
+    }
+
+    public Boolean getSelePeri() {
+        return selePeri;
+    }
+
+    public void setSelePeri(Boolean selePeri) {
+        this.selePeri = selePeri;
     }
 
     public Boolean getActiPeri() {

@@ -15,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -22,10 +23,12 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "Plantilla")
+@XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Plantilla.findAll", query = "SELECT p FROM Plantilla p"),
     @NamedQuery(name = "Plantilla.findByCodiPlant", query = "SELECT p FROM Plantilla p WHERE p.codiPlant = :codiPlant"),
-    @NamedQuery(name = "Plantilla.findByNombPlant", query = "SELECT p FROM Plantilla p WHERE p.nombPlant = :nombPlant")})
+    @NamedQuery(name = "Plantilla.findByNombPlant", query = "SELECT p FROM Plantilla p WHERE p.nombPlant = :nombPlant"),
+    @NamedQuery(name = "Plantilla.findByActvPlant", query = "SELECT p FROM Plantilla p WHERE p.actvPlant = :actvPlant")})
 public class Plantilla implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,12 +40,15 @@ public class Plantilla implements Serializable {
     @Size(max = 50)
     @Column(name = "nombPlant")
     private String nombPlant;
+    @Column(name = "actvPlant")
+    private Boolean actvPlant;
 
     public Plantilla() {
     }
 
     public Plantilla(String nombPlant) {
         this.nombPlant = nombPlant;
+        this.actvPlant=true;
     }
 
     public Plantilla(Integer codiPlant) {
@@ -63,6 +69,14 @@ public class Plantilla implements Serializable {
 
     public void setNombPlant(String nombPlant) {
         this.nombPlant = nombPlant;
+    }
+
+    public Boolean getActvPlant() {
+        return actvPlant;
+    }
+
+    public void setActvPlant(Boolean actvPlant) {
+        this.actvPlant = actvPlant;
     }
 
     @Override
