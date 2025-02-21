@@ -284,22 +284,22 @@
 
                     // Datos de la empresa y encabezado
                     doc.setFontSize(12);
-                    doc.text("ARCH LATAM", 20, 20); // Logo o nombre de la empresa
+                    doc.text("ARCH LATAM", 20, 20);  // Logo o nombre de la empresa
                     doc.setFontSize(8);
                     doc.text("PROYECCIÓN Y ADMINISTRACIÓN EMPRESARIAL DEL PERÚ S.R.L.", 20, 25);
                     doc.text("RUC: 20522038050", 20, 30);
                     doc.text("Av. Ricardo Rivera Navarrete 501 Interior 14 - Urb. Jardín", 20, 35);
 
-                    // Datos del periodo
+                    // Título y Fecha
                     doc.setFontSize(12);
                     doc.text("BOLETA DE PAGO", 105, 50, null, null, 'center');
                     doc.setFontSize(8);
                     doc.text("D.S. Nº 001-98-TR DEL 22/01/98", 20, 50);
                     doc.text("R.M. Nº 020-2008-TR DEL 17/01/08", 20, 55);
-                    doc.text("MES: " + selectedPeriodo, 105, 55, null, null, 'center');
+                    doc.text("MES: DICIEMBRE 2023", 105, 55, null, null, 'center');
                     doc.text("REM. BRUTA: S/ 2312.50", 190, 55, null, null, 'right');
 
-                    // Datos del empleado
+                    // Información del empleado
                     doc.setFontSize(8);
                     doc.text("Empleado: " + data.nombPers, 20, 70);
                     doc.text("Cargo: " + data.cargoPers, 20, 75);
@@ -308,9 +308,17 @@
                     doc.text("Centro de Costo: 185001 - PAE ING", 105, 75);
                     doc.text("Ingreso: 01/04/2021", 105, 80);
 
-                    // Ingresos
+                    // Separación para las tablas
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 85, 190, 85);  // Línea de separación
+
+                    // INICIO DE LA SECCIÓN CONSOLIDADA DE INGRESOS, DESCUENTOS, APORTES EMPRESA, PRESTAMO, OTROS Y SALDOS
+
+                    // Título de Ingresos
                     doc.setFontSize(10);
                     doc.text("INGRESOS", 20, 100);
+
+                    // Tabla de Ingresos
                     doc.autoTable({
                         startY: 105,
                         head: [['Descripción', 'Días/Hora', 'Importe']],
@@ -320,49 +328,77 @@
                             ['Bonificación Gratificación', '30', '150.00'],
                             ['Horas Extras 100%', '7', '300.00'],
                             ['Horas Extras 25%', '3', '120.00'],
-                                    // Otros ingresos que puedan existir
+                            // Total ingresos
+                            ['TOTAL INGRESOS', '', '5377.84']
                         ],
-                        margin: {top: 10}
+                        margin: {top: 10},
+                        theme: 'grid'
                     });
 
-                    // Descuentos
+                    // Tabla de Descuentos
                     doc.setFontSize(10);
-                    doc.text("DESCUENTOS", 105, doc.lastAutoTable.finalY + 10);
+                    doc.text("DESCUENTOS", 20, doc.lastAutoTable.finalY + 10);
                     doc.autoTable({
-                        startY: doc.lastAutoTable.finalY + 15,
+                        startY: doc.lastAutoTable.finalY + 5,
                         head: [['Descripción', 'Días/Hora', 'Importe']],
                         body: [
                             ['AFP Comisión', '1', '47.40'],
                             ['Impuesto a la Renta 5TA', '1', '100.00'],
                             ['Quincena', '1', '50.00'],
                             ['AFP Prima de Seguro', '1', '12.00'],
-                                    // Otros descuentos
-                        ]
+                            // Total descuentos
+                            ['TOTAL DESCUENTOS', '', '4324.35']
+                        ],
+                        margin: {top: 10},
+                        theme: 'grid'
                     });
 
-                    // Aportes Patronales
+                    // Tabla de Aportes Empresa
                     doc.setFontSize(10);
-                    doc.text("APORTES PATRONALES", 20, doc.lastAutoTable.finalY + 10);
+                    doc.text("APORTES EMPRESA", 20, doc.lastAutoTable.finalY + 10);
                     doc.autoTable({
-                        startY: doc.lastAutoTable.finalY + 15,
+                        startY: doc.lastAutoTable.finalY + 5,
                         head: [['Descripción', 'Importe']],
                         body: [
                             ['ESSALUD 9.00%', '232.29'],
                             ['Seguro Vida Ley', '20.65'],
-                                    // Otros aportes
-                        ]
+                            // Total Aportes Empresa
+                            ['TOTAL APORTES EMPRESA', '252.94']
+                        ],
+                        margin: {top: 10},
+                        theme: 'grid'
                     });
 
-                    // Totales
-                    doc.setFontSize(12);
-                    doc.text("TOTAL INGRESOS: S/ 5377.84", 20, doc.lastAutoTable.finalY + 10);
-                    doc.text("TOTAL DESCUENTOS: S/ 4324.35", 20, doc.lastAutoTable.finalY + 20);
-                    doc.text("IMPORTE NETO: S/ 1053.49", 20, doc.lastAutoTable.finalY + 30);
+                    // Cálculo del Importe Neto
+                    const totalIngresos = 5377.84;
+                    const totalDescuentos = 4324.35;
+                    const totalAportesEmpresa = 252.94;
+                    const importeNeto = totalIngresos - totalDescuentos - totalAportesEmpresa;
 
-                    // Firma y otros datos
+                    // Total en la sección de Saldo
                     doc.setFontSize(10);
-                    doc.text("Firma Trabajador: __________________", 20, doc.lastAutoTable.finalY + 50);
-                    doc.text("Firma Representante Legal: __________________", 105, doc.lastAutoTable.finalY + 50);
+                    doc.text("SALDO", 20, doc.lastAutoTable.finalY + 10);
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 5,
+                        head: [['Descripción', 'Importe']],
+                        body: [
+                            ['Préstamo', '100.00'],
+                            ['Otros', '50.00'],
+                            ['TOTAL SALDOS', '150.00']
+                        ],
+                        margin: {top: 10},
+                        theme: 'grid'
+                    });
+
+                    // Importe Neto
+                    doc.setFontSize(10);
+                    doc.text("IMPORTE NETO: S/ " + importeNeto.toFixed(2), 20, doc.lastAutoTable.finalY + 10);
+
+                    // Espacio para firmas
+                    doc.setFontSize(10);
+                    const firmaYPos = doc.lastAutoTable.finalY + 30;  // Después de la tabla
+                    doc.text("Firma Trabajador: __________________", 20, firmaYPos);
+                    doc.text("Firma Representante Legal: __________________", 105, firmaYPos + 10);
 
                     // Guardar el archivo PDF
                     doc.save('boleta_pago_' + data.nombPers + '.pdf');
@@ -373,5 +409,6 @@
                 alert("Error al obtener los datos de la persona");
             });
         });
+
     });
 </script>
