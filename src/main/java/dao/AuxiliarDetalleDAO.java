@@ -31,4 +31,31 @@ public class AuxiliarDetalleDAO extends AuxiliarDetalleJpaController {
             em.close();
         }
     }
+    // Método para importar los datos desde la lista de AuxiliarDetalle
+
+    public void importarDatos(List<AuxiliarDetalle> auxiliarDetalles) {
+        EntityManager em = getEntityManager();
+        try {
+            // Comenzar la transacción
+            em.getTransaction().begin();
+
+            // Recorrer la lista y persistir cada objeto en la base de datos
+            for (AuxiliarDetalle detalle : auxiliarDetalles) {
+                em.persist(detalle);
+            }
+
+            // Confirmar la transacción
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            // Si ocurre un error, revertir la transacción
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();  // Imprimir el error
+        } finally {
+            // Cerrar el EntityManager después de la operación
+            em.close();
+        }
+    }
 }

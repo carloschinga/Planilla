@@ -35,6 +35,10 @@
                 </div>
             </nav>
             <hr/>
+
+            <!-- Input de archivo oculto -->
+            <input type="file" id="fileInput" class="form-control mt-3" style="display:none;" />
+
             <table id="auxTable" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
@@ -53,13 +57,9 @@
         </div>
     </div>
 </div>
-
-<!-- Input de archivo oculto -->
-<input type="file" id="fileInput" class="form-control mt-3" style="display:none;" />
-
 <script>
     $(document).ready(function () {
-        $.getJSON("periodoservlet", function (data) {
+        $.getJSON("/Planilla/periodoservlet", function (data) {
             var select = $('#cmbPeriodo');
 
             // Limpiar las opciones existentes
@@ -256,61 +256,63 @@
 
 
         });
-
         // Evento para actualizar la tabla cuando cambie el auxiliar
         $('#cmbAuxiliar').on('change', function () {
             var selectedAuxiliar = $(this).val(); // Obtener el valor del auxiliar seleccionado
             auxTable.ajax.url('auxiliardetalleservlet?auxiliar=' + selectedAuxiliar).load();
         });
+
+        // Configurar el botón de importación
+        // Configurar el botón de importación
         $('#btnImportar').click(function () {
-            $('#fileInput').click(); // Abre el cuadro de selección de archivos
+            // Mostrar el input de archivo para seleccionar el archivo Excel
+            $('#fileInput').click();
         });
 
-// Cuando el usuario selecciona un archivo
+// Cuando el usuario seleccione un archivo
         $('#fileInput').change(function (e) {
-            var file = e.target.files[0];
-            if (file) {
-                var reader = new FileReader();
+            var file = e.target.files[0]; // Obtener el primer archivo seleccionado
 
-                reader.onload = function (event) {
-                    var data = event.target.result;
+            // Validar si el archivo es de tipo .xlsx
+            if (file && file.name.endsWith('.xlsx')) {
+                var formData = new FormData();
+                formData.append("fileInput", file); // Agregar el archivo al FormData
 
-                    // Usar la librería XLSX para leer el archivo Excel
-                    var workbook = XLSX.read(data, {type: 'binary'});
-
-                    // Suponiendo que el archivo tiene solo una hoja
-                    var sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-                    // Convertir la hoja en un JSON
-                    var jsonData = XLSX.utils.sheet_to_json(sheet);
-
-                    // Crear un objeto FormData para enviar el archivo
-                    var formData = new FormData();
-                    formData.append('action', 'importar');  // Acción para el servidor (puedes modificar el nombre de este parámetro)
-                    formData.append('file', file);          // El archivo seleccionado
-
-                    // Enviar los datos al servidor para su procesamiento
-                    $.ajax({
-                        url: 'ImportarAuxiliarServlet', // URL del servlet de importación
-                        type: 'POST',
-                        data: formData,
-                        processData: false, // No procesar los datos
-                        contentType: false, // No establecer el tipo de contenido
-                        success: function (response) {
-                            alert('Datos importados correctamente');
-                            auxTable.ajax.reload();  // Recargar la tabla con los nuevos datos
-                        },
-                        error: function (xhr, status, error) {
-                            console.log(xhr.responseText);  // Revisa la respuesta del servidor en la consola
-                            alert('Error al importar los datos');
+                // Hacer la petición al servlet para importar el archivo
+                $.ajax({
+                    url: '/Planilla/auxiliardetalleImportservlet', // URL del servlet
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, // No se debe establecer un tipo de contenido
+                    processData: false, // No procesar los datos
+                    success: function (response) {
+                        // Asegurarse de que la respuesta esté en formato JSON
+                        var result;
+                        try {
+                            result = JSON.parse(response);
+                            if (result.status === 'success') {
+                                alert('se importo correctamente');  // Mostrar mensaje de éxito
+                            } else {
+                                alert(result.message);  // Mostrar mensaje de error
+                            }
+                        } catch (error) {
+                            
                         }
-                    });
-                };
-
-                // Leer el archivo como binario
-                reader.readAsBinaryString(file);
+                    },
+                    error: function () {
+                        alert('Error al importar el archivo');
+                    },
+                    complete: function () {
+                        // Resetear el input de archivo para permitir seleccionar el mismo archivo nuevamente
+                        $('#fileInput').val('');
+                    }
+                });
+            } else {
+                alert('Por favor, seleccione un archivo de tipo .xlsx');
+                $('#fileInput').val(''); // Limpiar el campo si el archivo no es válido
             }
         });
+
 
 
     });

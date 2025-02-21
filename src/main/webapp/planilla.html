@@ -34,7 +34,10 @@
             <div class="d-flex align-items-center me-3">
                 <label for="cmbPersona" class="me-2 mb-0 fw-bold">Persona:</label>       
                 <select id="cmbPersona" class="form-select form-select-sm" style="width: auto;"></select>
+                <!-- Botón Imprimir -->
+                <button class="btn btn-secondary ms-3" id="btnImprimir">Imprimir Boleta</button>
             </div>
+
 
             <br/>
 
@@ -155,7 +158,7 @@
             dom: 't',
             paging: false,
             info: false,
-             pageLength: 100,
+            pageLength: 100,
             language: {
                 emptyTable: "No hay datos disponibles en la tabla"
             }
@@ -268,6 +271,107 @@
         $('#conceptoModal').on('shown.bs.modal', function () {
             $(this).find('button, input, select').first().focus();
         });
+        $('#btnImprimir').click(function () {
+            var selectedPersona = $('#cmbPersona').val();
+            var selectedPeriodo = $('#cmbPeriodo').val();
 
+            // Realiza una solicitud AJAX para obtener la información de la persona seleccionada
+            $.getJSON("personaservlet", {persona: selectedPersona, periodo: selectedPeriodo}, function (data) {
+                if (data) {
+                    // Crear el documento PDF
+                    const {jsPDF} = window.jspdf;
+                    const doc = new jsPDF();
+
+                    // Datos de la empresa y encabezado
+                    doc.setFontSize(12);
+                    doc.text("ARCH LATAM", 20, 20); // Logo o nombre de la empresa
+                    doc.setFontSize(8);
+                    doc.text("PROYECCIÓN Y ADMINISTRACIÓN EMPRESARIAL DEL PERÚ S.R.L.", 20, 25);
+                    doc.text("RUC: 20522038050", 20, 30);
+                    doc.text("Av. Ricardo Rivera Navarrete 501 Interior 14 - Urb. Jardín", 20, 35);
+
+                    // Datos del periodo
+                    doc.setFontSize(12);
+                    doc.text("BOLETA DE PAGO", 105, 50, null, null, 'center');
+                    doc.setFontSize(8);
+                    doc.text("D.S. Nº 001-98-TR DEL 22/01/98", 20, 50);
+                    doc.text("R.M. Nº 020-2008-TR DEL 17/01/08", 20, 55);
+                    doc.text("MES: " + selectedPeriodo, 105, 55, null, null, 'center');
+                    doc.text("REM. BRUTA: S/ 2312.50", 190, 55, null, null, 'right');
+
+                    // Datos del empleado
+                    doc.setFontSize(8);
+                    doc.text("Empleado: " + data.nombPers, 20, 70);
+                    doc.text("Cargo: " + data.cargoPers, 20, 75);
+                    doc.text("RUC: " + data.rucEmp, 20, 80);
+                    doc.text("Doc. Identidad: 12345678", 105, 70);
+                    doc.text("Centro de Costo: 185001 - PAE ING", 105, 75);
+                    doc.text("Ingreso: 01/04/2021", 105, 80);
+
+                    // Ingresos
+                    doc.setFontSize(10);
+                    doc.text("INGRESOS", 20, 100);
+                    doc.autoTable({
+                        startY: 105,
+                        head: [['Descripción', 'Días/Hora', 'Importe']],
+                        body: [
+                            ['Sueldo Básico', '30', '2312.50'],
+                            ['Asignación Familiar', '30', '200.00'],
+                            ['Bonificación Gratificación', '30', '150.00'],
+                            ['Horas Extras 100%', '7', '300.00'],
+                            ['Horas Extras 25%', '3', '120.00'],
+                                    // Otros ingresos que puedan existir
+                        ],
+                        margin: {top: 10}
+                    });
+
+                    // Descuentos
+                    doc.setFontSize(10);
+                    doc.text("DESCUENTOS", 105, doc.lastAutoTable.finalY + 10);
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 15,
+                        head: [['Descripción', 'Días/Hora', 'Importe']],
+                        body: [
+                            ['AFP Comisión', '1', '47.40'],
+                            ['Impuesto a la Renta 5TA', '1', '100.00'],
+                            ['Quincena', '1', '50.00'],
+                            ['AFP Prima de Seguro', '1', '12.00'],
+                                    // Otros descuentos
+                        ]
+                    });
+
+                    // Aportes Patronales
+                    doc.setFontSize(10);
+                    doc.text("APORTES PATRONALES", 20, doc.lastAutoTable.finalY + 10);
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 15,
+                        head: [['Descripción', 'Importe']],
+                        body: [
+                            ['ESSALUD 9.00%', '232.29'],
+                            ['Seguro Vida Ley', '20.65'],
+                                    // Otros aportes
+                        ]
+                    });
+
+                    // Totales
+                    doc.setFontSize(12);
+                    doc.text("TOTAL INGRESOS: S/ 5377.84", 20, doc.lastAutoTable.finalY + 10);
+                    doc.text("TOTAL DESCUENTOS: S/ 4324.35", 20, doc.lastAutoTable.finalY + 20);
+                    doc.text("IMPORTE NETO: S/ 1053.49", 20, doc.lastAutoTable.finalY + 30);
+
+                    // Firma y otros datos
+                    doc.setFontSize(10);
+                    doc.text("Firma Trabajador: __________________", 20, doc.lastAutoTable.finalY + 50);
+                    doc.text("Firma Representante Legal: __________________", 105, doc.lastAutoTable.finalY + 50);
+
+                    // Guardar el archivo PDF
+                    doc.save('boleta_pago_' + data.nombPers + '.pdf');
+                } else {
+                    alert("Error al cargar la información de la persona");
+                }
+            }).fail(function () {
+                alert("Error al obtener los datos de la persona");
+            });
+        });
     });
 </script>
