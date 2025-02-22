@@ -5,13 +5,16 @@
 package servlet;
 
 import dto.Marcacion;
+import java.util.Calendar;
 import dto.Persona;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,48 +39,91 @@ public class AsistenciaServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Configurar el response como JSON
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         JSONObject jsonResponse = new JSONObject();
 
         try {
-            // Leer el parámetro (se espera JSON, por ejemplo: {"numeDocu": "12345678"})
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = request.getReader().readLine()) != null) {
                 sb.append(line);
             }
             JSONObject jsonRequest = new JSONObject(sb.toString());
-            String numeDocu = jsonRequest.getString("numeDocu");
+            String numeDocu = jsonRequest.getString("numeDocu").trim();  // Aseguramos que no tenga espacios adicionales
 
             EntityManager em = emf.createEntityManager();
             try {
-                // Buscar la persona por número de documento usando JPQL
-                Persona persona = (Persona) em.createNamedQuery("Persona.findByNumeDocu")
+                // Buscar la persona por número de documento
+                List<Persona> personas = em.createNamedQuery("Persona.findByNumeDocu", Persona.class)
                         .setParameter("numeDocu", numeDocu)
-                        .getSingleResult();
+                        .getResultList();
 
-                if (persona != null) {
-                    // Crear la marcación de asistencia
-                    Marcacion marcacion = new Marcacion();
-                    marcacion.setCodiPers(persona.getCodiPers());
-                    marcacion.setFechMarc(new Date());
-                    marcacion.setMarcIngr(new Date());
-                    // Por ejemplo, marcSald se dejará nulo para la salida; en un escenario real se puede actualizar al cerrar jornada
+                if (!personas.isEmpty()) {
+                    Persona persona = personas.get(0);  // Tomamos el primer resultado si hay múltiples
 
-                    em.getTransaction().begin();
-                    em.persist(marcacion);
-                    em.getTransaction().commit();
+                    // Verificar si ya existe una marcación para hoy
+                    Date fechaHoy = new Date();  // Fecha actual
 
-                    jsonResponse.put("status", "success");
-                    jsonResponse.put("message", "Asistencia registrada");
-                    jsonResponse.put("codiMarc", marcacion.getCodiMarc());
+// Usamos Calendar para configurar la fecha a medianoche
+                    Calendar calendar = Calendar.getInstance();
+                    fechaHoy = calendar.getTime();
+                    calendar.setTime(fechaHoy);
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
+
+                    String sql = "SELECT * FROM Marcacion m WHERE m.codiPers = ? "
+                            + "AND m.marcIngr IS NOT NULL "
+                            + "AND m.marcSald IS NULL "
+                            + "AND CAST(m.fechMarc AS DATE) = CAST(? AS DATE)";
+                    Query query = em.createNativeQuery(sql, Marcacion.class);
+                    query.setParameter(1, persona.getCodiPers());
+                    query.setParameter(2, fechaHoy);  // Pasamos la fecha directamente
+                    List<Marcacion> marcaciones = query.getResultList();
+
+                    if (!marcaciones.isEmpty()) {
+                        // Si ya existe un registro de entrada para hoy, se registrará la hora de salida
+                        Marcacion marcacionExistente = marcaciones.get(0);
+                        if (marcacionExistente.getMarcSald() == null) {  // Si la hora de salida es nula
+                            marcacionExistente.setMarcSald(new Date()); // Registrar hora de salida
+                            em.getTransaction().begin();
+                            em.merge(marcacionExistente);
+                            em.getTransaction().commit();
+
+                            jsonResponse.put("status", "success");
+                            jsonResponse.put("message", "Hora de salida registrada");
+                            jsonResponse.put("codiMarc", marcacionExistente.getCodiMarc());
+                        } else {
+                            jsonResponse.put("status", "error");
+                            jsonResponse.put("message", "Ya se registró la salida para este día");
+                        }
+                    } else {
+                        // Si no existe marcación para hoy, crear un nuevo registro de entrada
+                        Marcacion nuevaMarcacion = new Marcacion();
+                        nuevaMarcacion.setCodiPers(persona.getCodiPers());
+                        nuevaMarcacion.setFechMarc(fechaHoy);
+                        nuevaMarcacion.setMarcIngr(new Date());  // Registrar la hora de entrada
+
+                        em.getTransaction().begin();
+                        em.persist(nuevaMarcacion);
+                        em.getTransaction().commit();
+
+                        jsonResponse.put("status", "success");
+                        jsonResponse.put("message", "Entrada registrada");
+                        jsonResponse.put("codiMarc", nuevaMarcacion.getCodiMarc());
+                    }
+                } else {
+                    jsonResponse.put("status", "error");
+                    jsonResponse.put("message", "Persona no encontrada para el documento: " + numeDocu);
                 }
             } catch (Exception e) {
+                e.printStackTrace();  // Imprimir detalles de la excepción
                 jsonResponse.put("status", "error");
-                jsonResponse.put("message", "Persona no encontrada");
+                jsonResponse.put("message", "Error en la consulta o procesamiento: " + e.getMessage());
             }
+
             out.print(jsonResponse.toString());
         } catch (Exception ex) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

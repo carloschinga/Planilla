@@ -92,8 +92,10 @@
                 alert("Error al cargar auxiliares");
             });
         }
+
         $('#btnPlantilla').click(function () {
             $.getJSON("personaservlet/personas/", function (data) {
+                
                 // Crea una nueva hoja de cálculo de Excel (Book)
                 const wb = XLSX.utils.book_new();
 
@@ -109,7 +111,7 @@
                 // Agregar los datos (reemplazar con los datos que quieras exportar)
                 $.each(data, function (index, persona) {
                     // Deja "Monto" y "Descripción" vacíos
-                    wsData.push([persona.Codigo, persona.Nombre, '', '']);  // Vacío para Monto y Descripción
+                    wsData.push([persona.Codigo, persona.codigo, '', '']);  // Vacío para Monto y Descripción
                 });
 
                 // Crear una hoja con los datos
@@ -124,9 +126,6 @@
                 alert("Error al cargar los datos para la plantilla.");
             });
         });
-
-
-
 
         // Inicializar DataTable
         const auxTable = $('#auxTable').DataTable({
@@ -153,7 +152,6 @@
                 url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
             }
         });
-
 
         // Agregar o Editar AuxiliarDetalle
         $('#auxForm').submit(function (e) {
@@ -253,9 +251,8 @@
         $('#cmbPeriodo').on('change', function () {
             var selectedPeriodo = $(this).val(); // Obtener el valor del periodo seleccionado
             actualizarAuxiliares(selectedPeriodo);
-
-
         });
+
         // Evento para actualizar la tabla cuando cambie el auxiliar
         $('#cmbAuxiliar').on('change', function () {
             var selectedAuxiliar = $(this).val(); // Obtener el valor del auxiliar seleccionado
@@ -263,13 +260,12 @@
         });
 
         // Configurar el botón de importación
-        // Configurar el botón de importación
         $('#btnImportar').click(function () {
             // Mostrar el input de archivo para seleccionar el archivo Excel
             $('#fileInput').click();
         });
 
-// Cuando el usuario seleccione un archivo
+        // Cuando el usuario seleccione un archivo
         $('#fileInput').change(function (e) {
             var file = e.target.files[0]; // Obtener el primer archivo seleccionado
 
@@ -312,8 +308,6 @@
                 $('#fileInput').val(''); // Limpiar el campo si el archivo no es válido
             }
         });
-
-
 
     });
 </script>
