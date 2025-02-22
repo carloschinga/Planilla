@@ -75,10 +75,10 @@
                         <i class="fas fa-fw fa-file-alt"></i>
                         <span>Conceptos</span></a>
                 </li>
-                  <div class="sidebar-heading">
+                <div class="sidebar-heading">
                     Asistencia
                 </div>
-                 <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" href="#" id="mnuTareo">
                         <i class="fas fa-fw fa-file-alt"></i>
                         <span>Tareo</span></a>
@@ -93,38 +93,40 @@
                         <i class="fas fa-fw fa-file-alt"></i>
                         <span>Horario</span></a>
                 </li>
-               
-               
+
+
 
                 <!-- Heading -->
                 <div class="sidebar-heading">
                     TABLAS
                 </div>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" id="mnuAuxiliar">
-                        <i class="fas fa-fw fa-table"></i>
-                        <span>Auxiliar</span></a>
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+                       aria-expanded="true" aria-controls="collapsePages">
+                        <i class="fas fa-fw fa-folder"></i>
+                        <span>Tablas</span>
+                    </a>
+                    <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Planilla:</h6>
+                            <a class="collapse-item" href="#" id="mnuAuxiliar">Auxiliar</a>
+                            <a class="collapse-item" href="#" id="mnuPlantilla">Plantilla</a>
+                            <a class="collapse-item" href="#" id="mnuAFP">AFP</a>
+                            <a class="collapse-item" href="#" id="mnuPeriodo">Periodo</a>
+                            <div class="collapse-divider"></div>
+                            <h6 class="collapse-header">Asistencia:</h6>
+                            <a class="collapse-item" href="#" id="mnuFeriado">Feriado</a>
+                        </div>
+                    </div>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="mnuPlantilla">
-                        <i class="fas fa-fw fa-table"></i>
-                        <span>Plantilla</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="mnuAFP">
-                        <i class="fas fa-fw fa-box"></i>
-                        <span>Fondo de Pensiones</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" id="mnuPeriodo">
-                        <i class="fas fa-fw fa-clock"></i>
-                        <span>Periodo</span></a>
-                </li>
+               
+             
+              
 
                 <div class="sidebar-heading">
                     PLAME y TREGITRO
                 </div>
-                  <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" href="#" id="mnuExportar">
                         <i class="fas fa-file-export"></i>
                         <span>Exportar</span></a>
@@ -350,14 +352,17 @@
             $('#mnuHorario').click(function () {
                 $('#contenido').load('horario.html');
             });
-              $('#mnuMarcacion').click(function () {
+            $('#mnuMarcacion').click(function () {
                 $('#contenido').load('marcacion.html');
             });
-             $('#mnuTareo').click(function () {
+            $('#mnuTareo').click(function () {
                 $('#contenido').load('tareo.html');
             });
             
-            
+            $('#mnuFeriado').click(function () {
+                $('#contenido').load('feriado.html');
+            });
+
             $('#mnuPlantilla').click(function () {
                 $('#contenido').load('plantilla.html');
             });

@@ -1,0 +1,209 @@
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="position-relative d-flex align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">Gestión de Feriados</h1>
+            </div> 
+            <nav class="navbar navbar-light bg-white p-2">  
+                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
+                    <!-- Grupo de Botones Imprimir y Exportar (derecha) -->
+                    <div class="btn-group ms-auto">
+                        <button class="btn btn-primary" id="btnNuevo">
+                            <i class="fas fa-fw fa-plus"></i>
+                            <span>Nuevo</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnPDF">
+                            <i class="fas fa-fw fa-print"></i>
+                            <span>Imprimir</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnExportar">
+                            <i class="fas fa-fw fa-file-excel"></i>
+                            <span>Exportar</span>
+                        </button>
+                    </div>
+                </div>
+
+            </nav>
+
+            <hr/>
+
+            <table id="feriadoTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agregar/Editar Feriado -->
+<div class="modal fade" id="feriadoModal" tabindex="-1" aria-labelledby="feriadoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="feriadoForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feriadoModalLabel">Editar Feriado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Se utiliza codiFeri como identificador -->
+                    <input type="hidden" id="codiFeri" name="codiFeri">
+                    <div class="mb-3">
+                        <label for="fechFeri" class="form-label">Fecha (yyyy-MM-dd)</label>
+                        <input type="date" class="form-control" id="fechFeri" name="fechFeri" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Librerías necesarias -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap Bundle con Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- Font Awesome (opcional para iconos) -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<!-- SheetJS para exportar a Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let feriadoTable = $('#feriadoTable').DataTable({
+            ajax: {
+                url: 'feriadoservlet',
+                type: 'GET',
+                dataSrc: ''
+            },
+            columns: [
+                {data: 'codiFeri'},
+                {data: 'fechFeri'},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return `
+                        <button class="btn btn-sm btn-primary btnEditar" data-id="${row.codiFeri}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                   
+                    `;
+                    }
+                }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
+            },
+            pageLength: 10
+        });
+
+        // Abrir modal para nuevo registro (puedes ajustar si es solo edición)
+        $('#btnNuevo').click(function () {
+            $('#feriadoForm')[0].reset();
+            $('#codiFeri').val('');
+            $('#feriadoModalLabel').text('Agregar Feriado');
+            $('#feriadoModal').modal('show');
+        });
+
+        // Enviar formulario para agregar o editar feriado
+        $('#feriadoForm').submit(function (e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let codiFeri = $('#codiFeri').val();
+            // Para editar, se usará PUT
+            let method = codiFeri ? 'PUT' : 'POST';
+            // En este ejemplo, se asume que para crear se usa POST a feriadoservlet (agregar la lógica en el servlet si corresponde)
+            let url = codiFeri ? 'feriadoservlet/' + codiFeri : 'feriadoservlet';
+
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                success: function (response) {
+                    $('#feriadoModal').modal('hide');
+                    feriadoTable.ajax.reload();
+                    alert(response.message ? response.message : 'Operación exitosa');
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.status + " - " + xhr.responseText);
+                }
+            });
+        });
+
+        // Editar registro
+        $('#feriadoTable tbody').on('click', '.btnEditar', function () {
+            let id = $(this).data('id');
+            $.ajax({
+                url: 'feriadoservlet/' + id,
+                type: 'GET',
+                success: function (data) {
+                    $('#codiFeri').val(data.codiFeri);
+                    $('#fechFeri').val(data.fechFeri);
+                    $('#feriadoModalLabel').text('Editar Feriado');
+                    $('#feriadoModal').modal('show');
+                },
+                error: function (xhr) {
+                    alert("Error al cargar el registro: " + xhr.responseText);
+                }
+            });
+        });
+
+        // Eliminar registro
+        $('#feriadoTable tbody').on('click', '.btnEliminar', function () {
+            let id = $(this).data('id');
+            if (confirm("¿Estás seguro de eliminar este feriado?")) {
+                $.ajax({
+                    url: 'feriadoservlet/' + id,
+                    type: 'DELETE',
+                    success: function (response) {
+                        feriadoTable.ajax.reload();
+                        alert(response.message ? response.message : 'Registro eliminado');
+                    },
+                    error: function (xhr) {
+                        alert("Error al eliminar: " + xhr.responseText);
+                    }
+                });
+            }
+        });
+
+        // Exportar tabla a Excel
+        $('#btnExportar').click(function () {
+            let tableData = [];
+            // Obtener encabezados
+            $('#feriadoTable thead th').each(function (i, header) {
+                tableData.push($(header).text());
+            });
+            let ws_data = [tableData];
+            // Recorrer filas
+            $('#feriadoTable tbody tr').each(function () {
+                let row = [];
+                $(this).find('td').each(function (index, cell) {
+                    // Omitir la columna de acciones (última)
+                    if (index < 2) {
+                        row.push($(cell).text());
+                    }
+                });
+                ws_data.push(row);
+            });
+            let ws = XLSX.utils.aoa_to_sheet(ws_data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Feriados");
+            XLSX.writeFile(wb, "feriados.xlsx");
+        });
+    });
+</script>

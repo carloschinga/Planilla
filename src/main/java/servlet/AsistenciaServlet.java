@@ -121,7 +121,7 @@ public class AsistenciaServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();  // Imprimir detalles de la excepción
                 jsonResponse.put("status", "error");
-                jsonResponse.put("message", "Error en la consulta o procesamiento: " + e.getMessage());
+                jsonResponse.put("message", "Error El DNI no figura en la base de datos: " + e.getMessage());
             }
 
             out.print(jsonResponse.toString());

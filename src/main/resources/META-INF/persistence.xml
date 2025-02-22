@@ -22,6 +22,7 @@
     <class>dto.VistaHorarioDetalle</class>
     <class>dto.VistaPersonaMarcacion</class>
     <class>dto.Marcacion</class>
+    <class>dto.Feriado</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\DESKTOP-00B730Q:1433;databaseName=Planilla;trustServerCertificate =true"/>
