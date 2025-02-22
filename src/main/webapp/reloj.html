@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reloj Marcador de Asistencia</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+      text-align: left;
+      color: #555;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #resultado {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    #reloj {
+      font-size: 24px;
+      margin-top: 20px;
+      font-family: monospace;
+      color: #007bff;
+    }
+  </style>
+  <script>
+    // Función que consulta al servlet para obtener la hora del servidor
+    function actualizarRelojServidor() {
+      fetch('horaServidor')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("reloj").innerText = data.hora;
+        })
+        .catch(error => {
+          console.error("Error al obtener la hora del servidor:", error);
+        });
+    }
+
+    // Actualizar cada segundo consultando la hora del servidor
+    setInterval(actualizarRelojServidor, 1000);
+    window.onload = actualizarRelojServidor;
+
+    // Función para registrar asistencia
+    function registrarAsistencia() {
+      const numeDocu = document.getElementById("numeDocu").value.trim();
+      if (!numeDocu) {
+        document.getElementById("resultado").innerText = "Por favor, ingresa tu número de documento.";
+        return;
+      }
+      const data = { numeDocu: numeDocu };
+
+      fetch('asistencia', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        const mensaje = result.status === "success" ? 
+                        "Asistencia registrada, codiMarc: " + result.codiMarc : 
+                        "Error: " + result.message;
+        document.getElementById("resultado").innerText = mensaje;
+      })
+      .catch(error => {
+        document.getElementById("resultado").innerText = "Error en la conexión";
+        console.error('Error:', error);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Marcador de Asistencia</h1>
+    <div>
+      <label for="numeDocu">Número de Documento:</label>
+      <input type="text" id="numeDocu" name="numeDocu" placeholder="Ingresa tu número de documento">
+    </div>
+    <div>
+      <button onclick="registrarAsistencia()">Marcar Asistencia</button>
+    </div>
+    <div id="resultado"></div>
+    <!-- Reloj digital que muestra la hora del servidor -->
+    <div id="reloj"></div>
+  </div>
+</body>
+</html>
