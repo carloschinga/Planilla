@@ -5,11 +5,19 @@
                 <h1 class="h3 mb-0 text-gray-800">Gestión de Horario Detalle</h1>
             </div>   
 
-                <nav class="navbar navbar-light bg-white p-2">  
-                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
-                    <!-- Grupo de Botones Imprimir y Exportar (derecha) -->
+            <nav class="navbar navbar-light bg-white p-2">  
+                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px; padding-right: 0px;">
+                    <!-- Combo de Búsqueda por Nombre (al lado izquierdo de los botones) -->
+
+
+                    <!-- Grupo de Botones Imprimir, Exportar, Nuevo -->
                     <div class="btn-group ms-auto">
-                        <button class="btn btn-primary" id="btnAddAfp">
+                        <div class="btn-group">
+                            <select id="cmbBuscarNombre" class="form-select">
+                                <!-- Las opciones se llenarán dinámicamente -->
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="btnAddHorario">
                             <i class="fas fa-fw fa-plus"></i>
                             <span>Nuevo</span>
                         </button>
@@ -23,8 +31,8 @@
                         </button>
                     </div>
                 </div>
-
             </nav>
+
 
             <hr/>
 
@@ -57,39 +65,47 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    
                     <!-- Se asume que se utiliza codiHoraDeta como identificador -->
                     <input type="hidden" id="codiHoraDeta" name="codiHoraDeta">
                     <div class="mb-4">
-                        <label for="codiHora" class="form-label d-block mb-2">Código </label>
-                        <input type="number" class="form-control" id="codiHora" name="codiHora" required>
+                        <label for="codiHora" class="form-label d-block mb-2">Código</label>
+                        <input type="number" class="form-control" id="codiHora" name="codiHora" required min="1" max="9999" aria-label="Código Hora" aria-required="true">
                     </div>
+
                     <div class="mb-4">
-                        <label for="nombHora" class="form-label d-block mb-2">Nombre </label>
-                        <input type="text" class="form-control" id="nombHora" name="nombHora" required>
+                        <label for="nombHora" class="form-label d-block mb-2">Nombre</label>
+                        <input type="text" class="form-control" id="nombHora" name="nombHora" required aria-label="Nombre Hora" aria-required="true">
                     </div>
+
                     <div class="mb-4">
                         <label for="codiDia" class="form-label d-block mb-2">Código Día</label>
-                        <input type="number" class="form-control" id="codiDia" name="codiDia" required>
+                        <input type="number" class="form-control" id="codiDia" name="codiDia" required min="1" max="7" aria-label="Código Día" aria-required="true">
                     </div>
+
                     <div class="mb-4">
                         <label for="nombDia" class="form-label d-block mb-2">Nombre Día</label>
-                        <input type="text" class="form-control" id="nombDia" name="nombDia">
+                        <input type="text" class="form-control" id="nombDia" name="nombDia" aria-label="Nombre Día">
                     </div>
+
                     <div class="mb-4">
                         <label for="codiTurn" class="form-label d-block mb-2">Código Turno</label>
-                        <input type="number" class="form-control" id="codiTurn" name="codiTurn">
+                        <input type="number" class="form-control" id="codiTurn" name="codiTurn" min="1" max="3" aria-label="Código Turno">
                     </div>
+
                     <div class="mb-4">
                         <label for="descTurn" class="form-label d-block mb-2">Descripción Turno</label>
-                        <input type="text" class="form-control" id="descTurn" name="descTurn">
+                        <input type="text" class="form-control" id="descTurn" name="descTurn" aria-label="Descripción Turno">
                     </div>
+
                     <div class="mb-4">
                         <label for="horaIngr" class="form-label d-block mb-2">Hora Ingreso</label>
-                        <input type="time" class="form-control" id="horaIngr" name="horaIngr">
+                        <input type="time" class="form-control" id="horaIngr" name="horaIngr" aria-label="Hora Ingreso">
                     </div>
+
                     <div class="mb-4">
                         <label for="horaSald" class="form-label d-block mb-2">Hora Salida</label>
-                        <input type="time" class="form-control" id="horaSald" name="horaSald">
+                        <input type="time" class="form-control" id="horaSald" name="horaSald" aria-label="Hora Salida">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -109,77 +125,95 @@
     $(document).ready(function () {
         let horarioTable;
 
-       initHorarioTable();
         // Inicializar DataTable para Horario Detalle
         function initHorarioTable() {
             horarioTable = $('#horarioTable').DataTable({
                 ajax: {
-                    url: 'horariodetalleservlet',
+                    url: 'horariodetalleservlet', // URL de la API que devuelve los detalles
                     type: 'GET',
-                    dataSrc: ''
-                  
+                    dataSrc: '' // El arreglo de datos se encuentra en el cuerpo de la respuesta
                 },
                 columns: [
-                    { data: 'codiHora' },
-                    { data: 'nombHora' },
-                    { data: 'codiHoraDeta' },
-                    { 
-                        data: 'nombDia',
-                        defaultContent: ''
-                    },
-                    { 
-                        data: 'descTurn',
-                        defaultContent: ''
-                    },
-                    { 
-                        data: 'horaIngr',
-                        render: function (data) {
+                    {data: 'codiHora'}, // Columna codiHora
+                    {data: 'nombHora'}, // Columna nombHora
+                    {data: 'codiHoraDeta'}, // Columna codiHoraDeta
+                    {data: 'nombDia'},
+                    {data: 'descTurn'},
+                    {data: 'horaIngr', render: function (data) {
                             return data ? data : '';
-                        }
-                    },
-                    { 
-                        data: 'horaSald',
-                        render: function (data) {
+                        }},
+                    {data: 'horaSald', render: function (data) {
                             return data ? data : '';
-                        }
-                    },
+                        }},
                     {
                         data: null,
                         render: function (data, type, row) {
                             return `
-                                <button class="btn btn-primary btnEdit" data-id="${row.codiHoraDeta}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                              
-                            `;
+                            <button class="btn btn-primary btnEdit" data-id="${row.codiHoraDeta}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        `;
                         }
                     }
                 ],
                 pageLength: 100,
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
+                },
+                initComplete: function () {
+                    // Al inicializar la tabla, ocultar las columnas codiHora, nombHora y codiHoraDeta
+                    horarioTable.column(0).visible(false);  // Ocultar codiHora (columna 0)
+                    horarioTable.column(1).visible(false);  // Ocultar nombHora (columna 1)
+                    horarioTable.column(2).visible(false);  // Ocultar codiHoraDeta (columna 2)
                 }
             });
         }
-
+        //const url = id ? `horariodetalleservlet/${id}` : 'horariodetalleservlet'; 
         // Manejo del formulario para Agregar/Editar Horario Detalle
         $('#horarioForm').submit(function (e) {
-            e.preventDefault();
-            const formData = $(this).serialize();
-            const id = $('#codiHoraDeta').val();
-            const url = id ? `HorarioDetalleServlet/${id}` : 'HorarioDetalleServlet';
-            const method = id ? 'PUT' : 'POST';
+            e.preventDefault();  // Evitar que el formulario se envíe de la manera tradicional
 
+            let formData = $(this).serialize();  // Obtener los datos del formulario
+
+            // Asegurarse de que el valor de horaIngr tenga el formato HH:mm:ss
+            let horaIngrStr = $('#horaIngr').val();
+            if (horaIngrStr && horaIngrStr.length === 5) {
+                horaIngrStr += ":00";  // Agregar segundos si no se proporcionan
+            }
+
+            // Hacer lo mismo con la hora de salida (horaSald)
+            let horaSaldStr = $('#horaSald').val();
+            if (horaSaldStr && horaSaldStr.length === 5) {
+                horaSaldStr += ":00";  // Agregar segundos si no se proporcionan
+            }
+
+            // Actualizar los valores de horaIngr y horaSald en formData
+            formData += `&horaIngr=${horaIngrStr}&horaSald=${horaSaldStr}`;
+
+            const id = $('#codiHoraDeta').val();  // Obtener el ID (si es un registro nuevo, este valor será vacío)
+            const url = id ? `horariodetalleservlet/${id}` : 'horariodetalleservlet';   // Usar POST para nuevos y PUT para editar
+            const method = id ? 'PUT' : 'POST';  // Si tiene ID, actualizar (PUT), si no, crear (POST)
+
+            // Enviar la solicitud AJAX
             $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                success: function () {
-                    $('#horarioModal').modal('hide');
-                    horarioTable.ajax.reload();
+                url: url, // URL del servlet para guardar
+                type: method, // Método HTTP (POST o PUT)
+                data: formData, // Datos del formulario
+                success: function (response) {
+                    // Manejo de éxito: Cerrar el modal y recargar la tabla
+                    $('#horarioModal').modal('hide');  // Cerrar el modal
+                    horarioTable.ajax.reload();  // Recargar la tabla con los datos actualizados
+
+                    // Opcional: Agregar una notificación o mensaje de éxito
+                    alert("Registro guardado exitosamente.");
+
+                    // Limpiar el formulario después de un registro exitoso
+                    $('#horarioForm')[0].reset();  // Resetear el formulario
                 },
-                error: function () {
-                    alert("Error al guardar el registro.");
+                error: function (xhr, status, error) {
+                    // Manejo de error: Mostrar un mensaje adecuado
+                    console.error("Error al guardar el registro:", error);
+                    alert("Error al guardar el registro. Intente nuevamente.");
                 }
             });
         });
@@ -196,8 +230,8 @@
                 $('#codiTurn').val(data.codiTurn);
                 $('#descTurn').val(data.descTurn);
                 // Suponiendo que el servlet envía las horas en formato "HH:mm:ss"
-                $('#horaIngr').val(data.horaIngr ? data.horaIngr.substring(0,5) : '');
-                $('#horaSald').val(data.horaSald ? data.horaSald.substring(0,5) : '');
+                $('#horaIngr').val(data.horaIngr ? data.horaIngr.substring(0, 5) : '');
+                $('#horaSald').val(data.horaSald ? data.horaSald.substring(0, 5) : '');
                 $('#horarioModalLabel').text('Editar Horario Detalle');
                 $('#horarioModal').modal('show');
             }).fail(function () {
@@ -255,6 +289,77 @@
             XLSX.writeFile(wb, 'horario_detalle.xlsx');
         });
 
+        // Cargar nombres en el combo de búsqueda
+        $.ajax({
+            url: '/Planilla/horariodetalleservlet/nombres',
+            type: 'GET',
+            success: function (data) {
+                // Llenar el combo con los nombres obtenidos
+                let combo = $('#cmbBuscarNombre');
+                combo.empty(); // Limpiar el combo antes de llenarlo
+
+                data.forEach(function (nombre) {
+                    combo.append('<option value="' + nombre + '">' + nombre + '</option>');
+                });
+            },
+            error: function () {
+                alert('Error al cargar los nombres.');
+            }
+        });
+
+        // Filtrar los datos por nombre y actualizar la tabla
+        // Filtrar los datos por nombre y actualizar la tabla
+        // Filtrar los datos por nombre y actualizar la tabla
+        // Filtrar los datos por nombre y actualizar la tabla
+        $('#cmbBuscarNombre').on('change', function () {
+            const selectedNombre = $(this).val();
+            let url = '/Planilla/horariodetalleservlet';
+            if (selectedNombre) {
+                url += '?nombHora=' + encodeURIComponent(selectedNombre); // Filtro por nombre
+            }
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (data) {
+                    let table = $('#horarioTable').DataTable();
+                    table.clear();  // Limpiamos la tabla
+
+                    // Llenar la tabla con los datos filtrados
+                    data.forEach(function (item) {
+                        table.row.add({
+                            'codiHora': item.codiHora, // Agregar codiHora
+                            'nombHora': item.nombHora, // Agregar nombHora
+                            'codiHoraDeta': item.codiHoraDeta, // Agregar codiHoraDeta
+                            'nombDia': item.nombDia,
+                            'descTurn': item.descTurn,
+                            'horaIngr': item.horaIngr ? item.horaIngr.substring(0, 5) : '',
+                            'horaSald': item.horaSald ? item.horaSald.substring(0, 5) : ''
+                        }).draw(false);
+                    });
+
+                    // Si hay un filtro aplicado, mantener ocultas las columnas codiHora, nombHora y codiHoraDeta
+                    if (selectedNombre) {
+                        // Las columnas codiHora, nombHora y codiHoraDeta ya están ocultas por la inicialización
+                    } else {
+                        // Asegurarse de que las columnas estén ocultas cuando no haya filtro
+                        horarioTable.column(0).visible(false);  // Ocultar codiHora
+                        horarioTable.column(1).visible(false);  // Ocultar nombHora
+                        horarioTable.column(2).visible(false);  // Ocultar codiHoraDeta
+                    }
+                },
+                error: function () {
+                    alert('Error al cargar los datos filtrados.');
+                }
+            });
+        });
+
+        // Inicializar la tabla al cargar la página (una sola vez)
+        initHorarioTable();
+
+        // Inicializar la tabla al cargar la página (una sola vez)
+
+
         // Si tienes un filtro global de búsqueda
         $('#txtBuscar').on('input', function () {
             horarioTable.search(this.value).draw();
@@ -272,4 +377,4 @@
         });
     });
 </script>
-    
+

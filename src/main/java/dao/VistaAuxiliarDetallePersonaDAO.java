@@ -4,6 +4,7 @@
  */
 package dao;
 
+import dao.VistaAuxiliarDetallePersonaJpaController;
 import dto.VistaAuxiliarDetallePersona;
 import java.util.List;
 import javax.persistence.EntityManager;

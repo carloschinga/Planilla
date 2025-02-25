@@ -70,6 +70,68 @@ public class FeriadoServlet extends HttpServlet {
 
     // Se usa doPut para actualizar un feriado
     @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            // Leer los parámetros enviados en la solicitud POST
+            // Asumimos que es el código del feriado
+            String fechaFeri = request.getParameter("fechFeri");
+
+            if (fechaFeri == null) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST, "Faltan campos requeridos o están vacíos");
+                return;
+            }
+
+// Convertir nombFeri a Integer (código del feriado)
+            
+            try {
+                
+            } catch (NumberFormatException e) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST, "Formato de código de feriado inválido: " + e.getMessage());
+                return;
+            }
+
+// Convertir la fecha de String a Date
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date fechFeriDate = null;
+            try {
+                fechFeriDate = dateFormat.parse(fechaFeri);
+            } catch (Exception e) {
+                writeError(response, HttpServletResponse.SC_BAD_REQUEST, "Formato de fecha inválido: " + e.getMessage());
+                return;
+            }
+
+// Crear un objeto Feriado
+            Feriado feriado = new Feriado();
+            feriado.setFechFeri(fechFeriDate);
+
+// Crear el nuevo feriado en la base de datos
+            feriadoDAO.create(feriado);
+
+// Respuesta exitosa
+            response.setStatus(HttpServletResponse.SC_CREATED);
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("message", "Feriado creado exitosamente");
+            jsonResponse.put("fechFeri", feriado.getFechFeri());  // Enviar el código del nuevo feriado
+            response.getWriter().write(jsonResponse.toString());
+        } catch (Exception e) {
+            // Manejo de errores generales
+            writeError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error al procesar la solicitud: " + e.getMessage());
+        }
+    }
+
+// Método para escribir errores en la respuesta
+    private void writeError(HttpServletResponse response, int statusCode, String errorMessage) throws IOException {
+        response.setStatus(statusCode);
+        JSONObject jsonError = new JSONObject();
+        jsonError.put("error", errorMessage);
+        response.getWriter().write(jsonError.toString());
+    }
+
+    @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json");
@@ -83,7 +145,7 @@ public class FeriadoServlet extends HttpServlet {
             String fechFeriStr = null;
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=");
-                if(keyValue.length == 2){
+                if (keyValue.length == 2) {
                     String key = keyValue[0];
                     String value = java.net.URLDecoder.decode(keyValue[1], "UTF-8");
                     if ("codiFeri".equals(key)) {
@@ -93,7 +155,7 @@ public class FeriadoServlet extends HttpServlet {
                     }
                 }
             }
-            if(codiFeriStr == null || fechFeriStr == null){
+            if (codiFeriStr == null || fechFeriStr == null) {
                 throw new Exception("Parámetros insuficientes");
             }
             int codiFeri = Integer.parseInt(codiFeriStr);

@@ -163,6 +163,13 @@
                 }
             });
         }
+        $('#fecha').change(function () {
+            let selectedDate = $('#fecha').val();
+
+            if (selectedDate) {
+                marcacionTable.column(3).search(selectedDate).draw();
+            }
+        });
 
         // Manejo del formulario para Agregar/Editar Marcación
         $('#personaMarcacionForm').submit(function (e) {

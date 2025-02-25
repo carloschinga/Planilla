@@ -70,19 +70,6 @@
         </div>
     </div>
 </div>
-
-<!-- Librerías necesarias -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap Bundle con Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- DataTables JS -->
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<!-- Font Awesome (opcional para iconos) -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<!-- SheetJS para exportar a Excel -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
 <script>
     $(document).ready(function () {
         let feriadoTable = $('#feriadoTable').DataTable({
@@ -119,6 +106,16 @@
             $('#feriadoModalLabel').text('Agregar Feriado');
             $('#feriadoModal').modal('show');
         });
+        // Abrir modal para nuevo registro (puedes ajustar si es solo edición)
+        $('#feriadoTable tbody').on('click', '.btnEdit', function () {
+            const id = $(this).data('id');
+            $.get(`feriadoservlet/${id}`, function (data) {
+                $('#codiFeri').val(data.codiPeri);
+                $('#fechFeri').val(data.fechFeri);
+                $('#feriadooModalLabel').text('Editar Periodo');
+                $('#feriadodoModal').modal('show');
+            });
+        })
 
         // Enviar formulario para agregar o editar feriado
         $('#feriadoForm').submit(function (e) {
@@ -184,25 +181,37 @@
         // Exportar tabla a Excel
         $('#btnExportar').click(function () {
             let tableData = [];
-            // Obtener encabezados
+
+            // Obtener los encabezados de la tabla y agregar las columnas de forma horizontal
+            let headers = [];
             $('#feriadoTable thead th').each(function (i, header) {
-                tableData.push($(header).text());
+                if (i < 2) {  // Solo obtener las primeras dos columnas (Código y Fecha)
+                    headers.push($(header).text().trim());
+                }
             });
-            let ws_data = [tableData];
-            // Recorrer filas
+
+            // Agregar los encabezados a la primera fila
+            tableData.push(headers);
+
+            // Agregar los datos de las filas
             $('#feriadoTable tbody tr').each(function () {
-                let row = [];
-                $(this).find('td').each(function (index, cell) {
-                    // Omitir la columna de acciones (última)
-                    if (index < 2) {
-                        row.push($(cell).text());
+                let rowData = [];
+                $(this).find('td').each(function (i, cell) {
+                    if (i < 2) {  // Excluir la columna "Acciones"
+                        rowData.push($(cell).text().trim());
                     }
                 });
-                ws_data.push(row);
+                tableData.push(rowData);  // Agregar la fila con los datos
             });
-            let ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            // Convertir los datos de la tabla en formato de hoja de cálculo
+            let ws = XLSX.utils.aoa_to_sheet(tableData);
+
+            // Crear un libro de trabajo y agregar la hoja
             let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Feriados");
+            XLSX.utils.book_append_sheet(wb, ws, "Feriados");  // Nombre de la hoja de Excel
+
+            // Descargar el archivo Excel
             XLSX.writeFile(wb, "feriados.xlsx");
         });
     });

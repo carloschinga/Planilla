@@ -4,6 +4,7 @@
  */
 package dao;
 
+import dao.PlanillaJpaController;
 import dto.Concepto;
 import dto.Planilla;
 import java.util.List;

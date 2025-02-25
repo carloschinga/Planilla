@@ -4,16 +4,15 @@
  */
 package dao;
 
-import dao.VistaPersonaDetalleJpaController;
 import javax.persistence.EntityManagerFactory;
 
 /**
  *
  * @author USER
  */
-public class VistaPersonaDetalleDAO extends VistaPersonaDetalleJpaController{
+public class HorarioDAO extends HorarioJpaController{
     
-    public VistaPersonaDetalleDAO(EntityManagerFactory emf) {
+    public HorarioDAO(EntityManagerFactory emf) {
         super(emf);
     }
     

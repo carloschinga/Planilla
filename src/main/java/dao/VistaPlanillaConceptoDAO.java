@@ -4,6 +4,7 @@
  */
 package dao;
 
+import dao.VistaPlanillaConceptoJpaController;
 import dto.VistaPlanillaConcepto;
 import java.util.List;
 import javax.persistence.EntityManager;

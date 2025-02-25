@@ -8,6 +8,7 @@ import dao.exceptions.NonexistentEntityException;
 import dao.exceptions.PreexistingEntityException;
 import dto.VistaHorarioDetalle;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -93,6 +94,29 @@ public class VistaHorarioDetalleJpaController implements Serializable {
             }
         }
     }
+    
+    public List<String> findUniqueNombres() {
+        EntityManager em = getEntityManager();
+        try {
+            // Usamos DISTINCT para evitar duplicados
+            String query = "SELECT DISTINCT v.nombHora FROM VistaHorarioDetalle v";
+            return em.createQuery(query, String.class).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<VistaHorarioDetalle> findVistaHorarioDetalleByNombre(String nombHora) {
+        EntityManager em = getEntityManager();
+        try {
+            String query = "SELECT v FROM VistaHorarioDetalle v WHERE v.nombHora = :nombHora";
+            return em.createQuery(query, VistaHorarioDetalle.class)
+                    .setParameter("nombHora", nombHora)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
 
     public List<VistaHorarioDetalle> findVistaHorarioDetalleEntities() {
         return findVistaHorarioDetalleEntities(true, -1, -1);
@@ -106,7 +130,9 @@ public class VistaHorarioDetalleJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            cq.select(cq.from(VistaHorarioDetalle.class));
+            cq
+                    .select(cq.from(VistaHorarioDetalle.class
+                    ));
             Query q = em.createQuery(cq);
             if (!all) {
                 q.setMaxResults(maxResults);
@@ -120,8 +146,10 @@ public class VistaHorarioDetalleJpaController implements Serializable {
 
     public VistaHorarioDetalle findVistaHorarioDetalle(int id) {
         EntityManager em = getEntityManager();
+
         try {
-            return em.find(VistaHorarioDetalle.class, id);
+            return em.find(VistaHorarioDetalle.class,
+                     id);
         } finally {
             em.close();
         }
@@ -131,7 +159,8 @@ public class VistaHorarioDetalleJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             CriteriaQuery cq = em.getCriteriaBuilder().createQuery();
-            Root<VistaHorarioDetalle> rt = cq.from(VistaHorarioDetalle.class);
+            Root<VistaHorarioDetalle> rt = cq.from(VistaHorarioDetalle.class
+            );
             cq.select(em.getCriteriaBuilder().count(rt));
             Query q = em.createQuery(cq);
             return ((Long) q.getSingleResult()).intValue();
@@ -139,5 +168,5 @@ public class VistaHorarioDetalleJpaController implements Serializable {
             em.close();
         }
     }
-    
+
 }

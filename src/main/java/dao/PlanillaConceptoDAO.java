@@ -4,6 +4,7 @@
  */
 package dao;
 
+import dao.PlanillaConceptoJpaController;
 import dto.PlanillaConcepto;
 import java.math.BigDecimal;
 import java.util.List;
