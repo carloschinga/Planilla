@@ -23,6 +23,31 @@
     <class>dto.VistaPersonaMarcacion</class>
     <class>dto.Marcacion</class>
     <class>dto.Feriado</class>
+    <class>dto.CategoriaOcupacional</class>
+    <class>dto.TipoVia</class>
+    <class>dto.Cldn</class>
+    <class>dto.SituacionEducativa</class>
+    <class>dto.RegimenLaboral</class>
+    <class>dto.TipoContrato</class>
+    <class>dto.RolPagina</class>
+    <class>dto.TipoDoc</class>
+    <class>dto.SituacionEspecial</class>
+    <class>dto.HorarioDetalle</class>
+    <class>dto.PaisEmisor</class>
+    <class>dto.TipoZona</class>
+    <class>dto.EntidadBancaria</class>
+    <class>dto.Pagina</class>
+    <class>dto.TipoOcupPrivado</class>
+    <class>dto.TipoOcupacion</class>
+    <class>dto.Nacionalidad</class>
+    <class>dto.Ubigeo</class>
+    <class>dto.Parametro</class>
+    <class>dto.PeriocidadRemuneracion</class>
+    <class>dto.TipoOcupPublico</class>
+    <class>dto.ConvenioEvitarDobleTributacion</class>
+    <class>dto.Turno</class>
+    <class>dto.TipoPago</class>
+    <class>dto.Dia</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\DESKTOP-00B730Q:1433;databaseName=Planilla;trustServerCertificate =true"/>
