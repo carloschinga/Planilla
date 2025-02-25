@@ -95,6 +95,9 @@ public class AsistenciaServlet extends HttpServlet {
                             jsonResponse.put("status", "success");
                             jsonResponse.put("message", "Hora de salida registrada");
                             jsonResponse.put("codiMarc", marcacionExistente.getCodiMarc());
+                            jsonResponse.put("nombre", persona.getNombPers());
+                            jsonResponse.put("hora", marcacionExistente.getMarcSald().toString());  // Hora de salida
+                            jsonResponse.put("marcacion", "salida");  // Enviar "salida"
                         } else {
                             jsonResponse.put("status", "error");
                             jsonResponse.put("message", "Ya se registró la salida para este día");
@@ -113,6 +116,9 @@ public class AsistenciaServlet extends HttpServlet {
                         jsonResponse.put("status", "success");
                         jsonResponse.put("message", "Entrada registrada");
                         jsonResponse.put("codiMarc", nuevaMarcacion.getCodiMarc());
+                        jsonResponse.put("nombre", persona.getNombPers());
+                        jsonResponse.put("hora", nuevaMarcacion.getMarcIngr().toString());  // Hora de entrada
+                        jsonResponse.put("marcacion", "entrada");  // Enviar "entrada"
                     }
                 } else {
                     jsonResponse.put("status", "error");
