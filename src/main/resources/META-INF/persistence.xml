@@ -48,6 +48,7 @@
     <class>dto.Turno</class>
     <class>dto.TipoPago</class>
     <class>dto.Dia</class>
+    <class>dto.MacHabilitadas</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost\DESKTOP-00B730Q:1433;databaseName=Planilla;trustServerCertificate =true"/>

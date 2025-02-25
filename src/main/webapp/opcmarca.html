@@ -1,0 +1,68 @@
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="position-relative d-flex align-items-center">
+                <h1 class="h3 mb-0 text-gray-800">Opciones de Marcación</h1>
+            </div>   
+            <nav class="navbar navbar-light bg-white p-2">  
+                <div class="container-fluid d-flex align-items-center" style="padding-left: 0px;padding-right: 0px;">
+                    <!-- Grupo de Botones Imprimir y Exportar (derecha) -->
+                    <div class="btn-group ms-auto">
+                        <button class="btn btn-primary" id="btnCrear">
+                            <i class="fas fa-fw fa-plus"></i>
+                            <span>PC en Marcador</span>
+                        </button>
+                        <button class="btn btn-primary" id="btnQuitar">
+                            <i class="fas fa-fw fa-minus"></i>
+                            <span>Quitar Marcador de PC</span>
+                        </button>
+
+                    </div>
+                </div>
+
+            </nav>
+
+            <div id="alertaCreacion" class="alert alert-success alert-dismissible fade show" role="alert" style="display:none;">
+                ¡La cookie ha sido creada correctamente!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div id="alertaEliminacion" class="alert alert-warning alert-dismissible fade show" role="alert" style="display:none;">
+                ¡La cookie ha sido eliminada!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#btnCrear").click(function () {
+            // Crear la cookie con una expiración de 100 años
+            Cookies.set('habilitado', 'si', {expires: 36500, path: '/'});
+
+            // Mostrar la alerta de creación
+            $("#alertaCreacion").fadeIn();
+            // Desvanecer la alerta después de 2 segundos de espera y 2 segundos de fadeOut
+            setTimeout(function () {
+                $("#alertaCreacion").fadeOut(2000);
+            }, 2000);
+        });
+
+        $("#btnQuitar").click(function () {
+            // Eliminar la cookie (estableciendo un tiempo negativo)
+            Cookies.remove('habilitado', {path: '/'});
+
+            // Mostrar la alerta de eliminación
+            $("#alertaEliminacion").fadeIn();
+            // Desvanecer la alerta después de 2 segundos de espera y 2 segundos de fadeOut
+            setTimeout(function () {
+                $("#alertaEliminacion").fadeOut(2000);
+            }, 2000);
+        });
+    });
+</script>

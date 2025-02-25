@@ -69,6 +69,8 @@
                 color: #007bff;
             }
         </style>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+        <script src="vendor/jquery/jquery.min.js"></script>
         <script>
             // Función que consulta al servlet para obtener la hora del servidor
             function actualizarRelojServidor() {
@@ -140,5 +142,24 @@
             <!-- Reloj digital que muestra la hora del servidor -->
             <div id="reloj"></div>
         </div>
+        <div class="container2">
+            <h1>Marcador de Asistencia</h1>
+            <div>
+                ¡Esta PC no esta habilitada para marcar asistencia!
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                $(".container").hide();
+                $(".container2").hide();
+                if (!Cookies.get('habilitado')) {
+                    $(".container").hide();
+                    $(".container2").show();
+                } else {
+                    $(".container").show();
+                    $(".container2").hide();
+                }
+            });
+        </script>
     </body>
 </html>
