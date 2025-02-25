@@ -35,23 +35,6 @@ public class PersonaDAO extends PersonaJpaController {
         }
     }
 
-    public Map<Integer, BigDecimal> getCodiPersAndSuelPers() {
-        EntityManager em = getEntityManager();
-        try {
-            // Obtener todas las personas
-            List<Persona> personas = listarActivos();
-            Map<Integer, BigDecimal> result = new HashMap<>();
-
-            // Llenar la tabla hash con codiPers y suelPers
-            for (Persona persona : personas) {
-                result.put(persona.getCodiPers(), persona.getSuelPers());
-            }
-
-            return result;
-        } finally {
-            em.close();
-        }
-    }
     public static void main(String[] args) {
           EntityManagerFactory emf = Persistence.createEntityManagerFactory("com.mycompany_Planilla_war_1.0-SNAPSHOTPU");
 

@@ -108,7 +108,6 @@ public class PersonaServlet extends HttpServlet {
                     jsonObject.put("codiAFP", persona.getCodiAFP());
                     jsonObject.put("codiPlant", persona.getCodiPlant());
                     jsonObject.put("actiPers", persona.getActiPers());
-                    jsonObject.put("suelPers", persona.getSuelPers());
                     jsonObject.put("asigFamiPers", persona.getAsigFamiPers());
                     response.getWriter().write(jsonObject.toString());
                 } else {
@@ -149,7 +148,6 @@ public class PersonaServlet extends HttpServlet {
             Persona persona = new Persona();
             persona.setNumeDocu(numeDocu);
             persona.setNombPers(nombPers);
-            persona.setSuelPers(new BigDecimal(suelPers)); // Asegúrate de validar que es un número válido
             persona.setCodiAFP(codiAFP != null ? Integer.parseInt(codiAFP) : 0); // Valor opcional
             persona.setCodiPlant(Integer.parseInt(codiPlant));
             persona.setActiPers(Boolean.parseBoolean(actiPers));
@@ -158,11 +156,7 @@ public class PersonaServlet extends HttpServlet {
             // Asignar el nuevo campo
 
             // Validar sueldo positivo
-            if (persona.getSuelPers().compareTo(BigDecimal.ZERO) <= 0) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(new JSONObject().put("error", "El sueldo debe ser mayor a 0").toString());
-                return;
-            }
+           
 
             // Guardar persona
             personaDAO.create(persona);
@@ -225,7 +219,6 @@ public class PersonaServlet extends HttpServlet {
             // Actualizar los datos de la persona existente
             personaExistente.setNumeDocu(parameters.get("numeDocu"));
             personaExistente.setNombPers(parameters.get("nombPers"));
-            personaExistente.setSuelPers(new BigDecimal(parameters.get("suelPers")));
             personaExistente.setCodiAFP(Integer.parseInt(parameters.get("codiAFP")));
             personaExistente.setCodiPlant(Integer.parseInt(parameters.get("codiPlant")));
             personaExistente.setActiPers(Boolean.parseBoolean(parameters.get("actiPers")));
@@ -248,7 +241,6 @@ public class PersonaServlet extends HttpServlet {
             jsonResponse.put("codiAFP", personaExistente.getCodiAFP());
             jsonResponse.put("codiPlant", personaExistente.getCodiPlant());
             jsonResponse.put("actiPers", personaExistente.getActiPers());
-            jsonResponse.put("suelPers", personaExistente.getSuelPers());
             jsonResponse.put("asigFamiPers", personaExistente.getAsigFamiPers());
             jsonResponse.put("snpPers", personaExistente.getSnpPers()); // Nuevo campo agregado en la respuesta
 

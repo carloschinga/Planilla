@@ -35,7 +35,7 @@
                 text-align: left;
                 color: #555;
             }
-            input[type="text"] {
+            input[type="text"], select {
                 width: 100%;
                 padding: 10px;
                 margin-bottom: 15px;
@@ -72,34 +72,46 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="vendor/jquery/jquery.min.js"></script>
         <script>
-            // Función que consulta al servlet para obtener la hora del servidor
-            function actualizarRelojServidor() {
-                fetch('horaServidor')
-                        .then(response => response.json())
-                        .then(data => {
-                            document.getElementById("reloj").innerText = data.hora;
-                        })
-                        .catch(error => {
-                            console.error("Error al obtener la hora del servidor:", error);
+
+            // Función para consultar al servlet y obtener los tipos de documento
+            function cargarTiposDoc() {
+                $.ajax({
+                    url: '/Planilla/tipodocumentoservlet', // URL de tu servlet
+                    type: 'GET',
+                    success: function (data) {
+                        // Llenar el combo con los nombres obtenidos
+                        let combo = $('#tipoDocCombo');
+                        combo.empty(); // Limpiar el combo antes de llenarlo
+
+                        data.forEach(function (nombre) {
+                            combo.append('<option value="' + nombre.codiTipoDoc + '">' + nombre.nombTipoDoc + '</option>');
                         });
+                    },
+                    error: function () {
+                        alert('Error al cargar los nombres.');
+                    }
+
+                });
+
             }
 
-            // Actualizar cada segundo consultando la hora del servidor
-            setInterval(actualizarRelojServidor, 1000);
-            window.onload = actualizarRelojServidor;
 
             // Función para registrar asistencia
             function registrarAsistencia() {
+                const tipoDocu = document.getElementById("tipoDocCombo").value;
                 const numeDocu = document.getElementById("numeDocu").value.trim();
 
-                // Validación del número de documento (8 dígitos)
-                if (!numeDocu || numeDocu.length !== 8) {
-                    document.getElementById("resultado").innerText = "Por favor, ingresa un número de documento válido de 8 dígitos.";
+                if (!numeDocu) {
+                    document.getElementById("resultado").innerText = "Por favor, ingresa un número de documento válido.";
                     return;
                 }
 
-                const data = {numeDocu: numeDocu};
+                if (!tipoDocu) {
+                    document.getElementById("resultado").innerText = "Por favor, selecciona un tipo de documento.";
+                    return;
+                }
 
+                const data = {numeDocu: numeDocu, codiTipoDoc: tipoDocu};
                 fetch('asistencia', {
                     method: 'POST',
                     headers: {
@@ -116,7 +128,6 @@
                                     "Error: " + result.message;
                             document.getElementById("resultado").innerText = mensaje;
 
-                            // Ocultar el mensaje después de 5 segundos
                             setTimeout(() => {
                                 document.getElementById("resultado").innerText = "";
                             }, 5000);
@@ -126,11 +137,37 @@
                             console.error('Error:', error);
                         });
             }
+
+            // Actualizar el reloj cada segundo
+            function actualizarRelojServidor() {
+                fetch('horaServidor')
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById("reloj").innerText = data.hora;
+                        })
+                        .catch(error => {
+                            console.error("Error al obtener la hora del servidor:", error);
+                        });
+            }
+
+            setInterval(actualizarRelojServidor, 1000);
+            window.onload = () => {
+                cargarTiposDoc();  // Cargar los tipos de documento cuando se cargue la página
+                actualizarRelojServidor();
+            };
+
         </script>
     </head>
     <body>
         <div class="container">
             <h1>Marcador de Asistencia</h1>
+            <div>
+                <label for="tipoDocCombo">Tipo de Documento:</label>
+                <select id="tipoDocCombo" name="tipoDocCombo">
+                    <option value="">Selecciona un tipo de documento</option>
+                    <!-- Las opciones se cargarán aquí desde el servidor -->
+                </select>
+            </div>
             <div>
                 <label for="numeDocu">Número de Documento:</label>
                 <input type="text" id="numeDocu" name="numeDocu" placeholder="Ingresa tu número de documento">
@@ -159,7 +196,8 @@
                     $(".container").show();
                     $(".container2").hide();
                 }
-            });
+            }
+            );
         </script>
     </body>
 </html>
