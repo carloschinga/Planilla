@@ -1,3 +1,5 @@
+
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
@@ -11,13 +13,11 @@
 
                     <div class="btn-group ms-auto">
                         <div class="d-flex align-items-center">
-                            <!--<label for="fecha" class="form-label me-2 mb-0">Fecha:</label>-->
-                            <input type="date" class="form-control" id="fecha" name="fecha" style="max-width: 200px;">
+                            <!-- Campo de Fecha de Inicio -->
+                            <input type="date" class="form-control" id="fechaInicio" name="fechaInicio" style="max-width: 200px; margin-right: 10px;">
+                            <!-- Campo de Fecha de Fin -->
+                            <input type="date" class="form-control" id="fechaFin" name="fechaFin" style="max-width: 200px;">
                         </div>
-                        <button class="btn btn-primary" id="btnAddMarcacion">
-                            <i class="fas fa-fw fa-plus"></i>
-                            <span>Nuevo</span>
-                        </button>
                         <button class="btn btn-primary" id="btnPDF">
                             <i class="fas fa-fw fa-print"></i>
                             <span>Imprimir</span>
@@ -107,7 +107,8 @@
         let marcacionTable;
         let today = new Date().toISOString().split('T')[0];
 
-        $('#fecha').val(today);
+        $('#fechaInicio').val(today);
+        $('#fechaFin').val(today);
 
         initMarcacionTable();
 
@@ -151,10 +152,15 @@
                         data: null,
                         render: function (data, type, row) {
                             return `
-                                
-                              
-                            `;
+                        
+                    `;
                         }
+                    }
+                ],
+                columnDefs: [
+                    {
+                        targets: 4, // Índice de la columna que deseas ocultar
+                        visible: false // Ocultar la columna
                     }
                 ],
                 pageLength: 100,
@@ -163,13 +169,56 @@
                 }
             });
         }
-        $('#fecha').change(function () {
-            let selectedDate = $('#fecha').val();
 
-            if (selectedDate) {
-                marcacionTable.column(3).search(selectedDate).draw();
+        // Manejo de cambio en fecha inicio
+        // Cuando se cambia #fechaInicio
+        // Manejo de cambio en fecha inicio
+        $('#fechaInicio').change(function () {
+            let fechaInicio = $('#fechaInicio').val();
+            if (fechaInicio) {
+                // Establecer #fechaFin a la misma fecha que #fechaInicio
+                $('#fechaFin').val(fechaInicio);
+
+                // Obtener la fecha de #fechaInicio
+                let fechaInicioObj = new Date(fechaInicio);
+
+                // Establecer fecha máxima de #fechaFin a 31 días después de #fechaInicio
+                let fechaFinObj = new Date(fechaInicioObj);
+                fechaFinObj.setDate(fechaInicioObj.getDate() + 31);
+
+                // Convertir la fecha a formato yyyy-mm-dd
+                let fechaFin = fechaFinObj.toISOString().split('T')[0];
+
+                // Establecer la fecha máxima de #fechaFin
+                $('#fechaFin').attr('max', fechaFin);
             }
         });
+
+        // Cuando se cambia #fechaFin
+        $('#fechaFin').change(function () {
+            let fechaInicio = $('#fechaInicio').val();
+            let fechaFin = $('#fechaFin').val();
+
+            if (fechaInicio && fechaFin) {
+                let fechaInicioObj = new Date(fechaInicio);
+                let fechaFinObj = new Date(fechaFin);
+
+                // Filtrar la columna de fechas
+                marcacionTable.column(3).search(function (data, row, column, node) {
+                    let fechaData = new Date(data);
+
+                    if (fechaData >= fechaInicioObj && fechaData <= fechaFinObj) {
+                        return true;
+                    }
+                    return false;
+                }).draw();
+            }
+        });
+
+        // Función para verificar si hay datos visibles en la tabla
+        function hasVisibleData() {
+            return marcacionTable.rows({filter: 'applied'}).data().length > 0;
+        }
 
         // Manejo del formulario para Agregar/Editar Marcación
         $('#personaMarcacionForm').submit(function (e) {
@@ -238,10 +287,14 @@
 
         // Exportar a Excel
         $('#btnExportar').click(function () {
+            if (!hasVisibleData()) {
+                alert("No hay datos disponibles para exportar en este rango de fechas.");
+                return;
+            }
+
             let tableData = [];
             let headers = [];
             $('#personaMarcacionTable thead th').each(function (i, header) {
-                // Excluir columna de acciones
                 if (i < $('#personaMarcacionTable thead th').length - 1) {
                     headers.push($(header).text());
                 }
@@ -262,8 +315,13 @@
             XLSX.writeFile(wb, 'marcacion_persona.xlsx');
         });
 
-        // Imprimir: se puede abrir una nueva ventana con el contenido a imprimir
+        // Imprimir
         $('#btnPDF').click(function () {
+            if (!hasVisibleData()) {
+                alert("No hay datos disponibles para imprimir en este rango de fechas.");
+                return;
+            }
+
             let divToPrint = document.getElementById("personaMarcacionTable");
             let newWin = window.open("");
             newWin.document.write(divToPrint.outerHTML);
@@ -271,4 +329,5 @@
             newWin.close();
         });
     });
+
 </script>
